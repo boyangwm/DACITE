@@ -1,0 +1,6 @@
+1.  JAssignStmt
+
+	1.1 Right is Immediate 
+		
+		b = 2;
+		query = "select SSN, SALARY, AGE from PERSON;"      not process

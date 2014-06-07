@@ -1,0 +1,50 @@
+public class HelloWorld3 extends java.lang.Object
+{
+
+    public static void main(java.lang.String[])
+    {
+        java.lang.String[] args;
+        int a, b, c, temp$0, temp$1, temp$2, temp$3, temp$4, temp$5, temp$6, temp$7, temp$8;
+
+        args := @parameter0;
+        a = 1;
+        b = 2;
+        c = 0;
+        temp$0 = a;
+        temp$1 = temp$0 + c;
+        b = temp$1;
+        a = b;
+        temp$2 = a;
+        temp$3 = c;
+        temp$4 = temp$3 + a;
+        temp$5 = temp$2 + b;
+        temp$6 = temp$4 + 2;
+        if temp$5 > temp$6 goto label0;
+
+        goto label1;
+
+     label0:
+        nop;
+        temp$7 = 1;
+        c = temp$7;
+        goto label2;
+
+     label1:
+        nop;
+        temp$8 = 2;
+        c = temp$8;
+
+     label2:
+        nop;
+        return;
+    }
+
+    public void <init>()
+    {
+        HelloWorld3 this;
+
+        this := @this;
+        this.<init>();
+        return;
+    }
+}
