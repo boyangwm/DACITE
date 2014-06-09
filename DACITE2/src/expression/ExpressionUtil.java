@@ -108,7 +108,13 @@ public class ExpressionUtil {
 		} else if(v instanceof JCmpgExpr){
 			throw new RuntimeException("## Exception: JCmpgExpr type doesn't handle");
 		} else if(v instanceof JCmplExpr){
-			throw new RuntimeException("## Exception: JCmplExpr type doesn't handle");
+			JCmplExpr jExpr = (JCmplExpr) v;
+			Value op1 = jExpr.getOp1();
+			Value op2 = jExpr.getOp2();
+			IntegerExpression ie1 = transferSimpleValue(op1, expressionMap);
+			IntegerExpression ie2 = transferSimpleValue(op2, expressionMap);
+			System.out.println("return  : " + ie1._minus(ie2));
+			return ie1._minus(ie2);
 		} else if(v instanceof ConditionExpr){
 			//EQ
 			//Eg

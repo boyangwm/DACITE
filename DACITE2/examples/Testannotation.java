@@ -8,6 +8,20 @@ import java.sql.*;
 public class Testannotation {
 	
 
+	public static void foo(int c){
+		
+		int a;
+		
+		int b = 2;
+		
+		if(c<b)
+			a = 3;
+		else
+			a = 4;
+		
+	}
+	
+
 	public void setQuantity(int itemID, int quantity) throws Exception {
 		try {
 			
@@ -30,16 +44,9 @@ public class Testannotation {
 			double age =  rs.getInt("AGE");
 			DBAnnotation.annoate("age","PERSON","AGE",true);
 
-			double  bonus;
-			if(age > 30)
-			{
-				bonus = salary - 500;
-				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
-			}else
-			{
-				bonus = salary - 200;
-				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
-			}
+
+			double s = salary * 2;
+			double  bonus = s + 10 * age;
 
 			String updateS = "UPDATE PERSON SET BONUS = ?  WHERE SSN = ?";
 
@@ -47,8 +54,9 @@ public class Testannotation {
 			preparedStmt.setDouble(1, bonus);
 			preparedStmt.setString(2, ssn);
 
+			
 			preparedStmt.executeUpdate();
-			//DBAnnotation.annoate("bonus","PERSON","BONUS",false);
+			DBAnnotation.annoate("bonus","PERSON","BONUS",false);
 
 			conn.close();
 			System.out.println("Done!");
