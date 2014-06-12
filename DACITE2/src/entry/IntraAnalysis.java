@@ -1,10 +1,11 @@
+package entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+
+import com.constraint.ConstraintBuilder;
 
 import soot.Body;
 import soot.BodyTransformer;
@@ -13,12 +14,7 @@ import soot.Local;
 import soot.SootMethodRef;
 import soot.Unit;
 import soot.Value;
-import soot.ValueBox;
-import soot.dava.internal.javaRep.DVariableDeclarationStmt;
-import soot.grimp.internal.GNewInvokeExpr;
 import soot.jimple.*;
-import soot.jimple.internal.AbstractStmt;
-import soot.jimple.internal.JAddExpr;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JBreakpointStmt;
 import soot.jimple.internal.JCastExpr;
@@ -29,7 +25,6 @@ import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JLookupSwitchStmt;
-import soot.jimple.internal.JLtExpr;
 import soot.jimple.internal.JNopStmt;
 import soot.jimple.internal.JRetStmt;
 import soot.jimple.internal.JReturnStmt;
@@ -37,13 +32,10 @@ import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JTableSwitchStmt;
 import soot.jimple.internal.JThrowStmt;
-import soot.jimple.internal.JimpleLocal;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.util.Chain;
 import expression.StmtCondition;
-import expression.ExprManager;
 import expression.ExpressionUtil;
-import gov.nasa.jpf.symbc.numeric.Comparator;
 import gov.nasa.jpf.symbc.numeric.IntegerExpression;
 import static expression.ExpressionUtil.*;
 
@@ -53,6 +45,8 @@ public class IntraAnalysis extends BodyTransformer{
 	private IntraAnalysis() {}
 	public static IntraAnalysis v() { return instance; }
 	static String oldPath;
+	
+
 
 
 	Map<Unit, StatesOfUnit> mapState = new HashMap<Unit, StatesOfUnit>();
@@ -91,7 +85,8 @@ public class IntraAnalysis extends BodyTransformer{
 			}	
 			StatesOfUnit sou = new StatesOfUnit(map);
 			//start at True
-			sou.setPreCon(new StmtCondition()); 
+			//sou.setPreCon(new StmtCondition()); 
+			sou.setPreCon(new ConstraintBuilder()); 
 			mapState.put(unit, sou);
 
 			System.out.println("head : " + unit.toString() + " " + unit.hashCode()); 
@@ -155,7 +150,7 @@ public class IntraAnalysis extends BodyTransformer{
 			int nonVisisted = preds.size();
 			for (int i = 0; i < preds.size(); i++) {
 				Unit pred = preds.get(i);
-				System.out.println("pre u : " + pred.toString() + pred.hashCode() ); 
+				//System.out.println("pre u : " + pred.toString() + pred.hashCode() ); 
 				if(visited.contains(pred))
 					nonVisisted--;
 			}
@@ -322,7 +317,7 @@ public class IntraAnalysis extends BodyTransformer{
 			//such as "specialinvoke this.<java.lang.Object: void <init>()>()"
 			StatesOfUnit sou = mapState.get(stmt);
 			Map<Local, IntegerExpression> preState = sou.getPre();
-
+			ConstraintBuilder stmtCondition = sou.getPreCon();
 
 			System.out.println("JinvokeStmt");
 			JInvokeStmt invStmt = (JInvokeStmt)stmt;
@@ -337,14 +332,13 @@ public class IntraAnalysis extends BodyTransformer{
 				{
 					System.out.println( "annotation invoke !!!");
 					List <Value> AArgs = gNewInv.getArgs();
-
-					ExpressionUtil.updateAnnotationInMap(AArgs, preState);
+					// update annotation map if it's necessary. (Source)
+					// or store the constraint. (Sink) 
+					ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition);
 					assert(AArgs.size() == 4);
 					for(Value vb : AArgs)
 					{
-
 						System.out.println( "vb.getValue() : " + vb.toString());
-
 					}
 
 				}
@@ -363,7 +357,7 @@ public class IntraAnalysis extends BodyTransformer{
 			sou.updatePostState(preState);
 
 			//condition part
-			StmtCondition newCon = sou.getPreCon();
+			ConstraintBuilder newCon = sou.getPreCon();
 			Value curCon = ifStmt.getCondition();
 			//System.out.println("preCon 1-1  :" + newCon.toString());
 			transferConditionExp(curCon, preState, newCon, false);
@@ -371,7 +365,7 @@ public class IntraAnalysis extends BodyTransformer{
 			sou.setIsBranch(true);
 			//System.out.println("preCon 1-2  :" + newCon.toString());
 
-			StmtCondition newBranchCon = sou.getPreCon();
+			ConstraintBuilder newBranchCon = sou.getPreCon();
 			//System.out.println("preCon 2-1  :" + newBranchCon.toString());
 			transferConditionExp(curCon, preState, newBranchCon, true);
 			sou.setPostBranchCon(newBranchCon);

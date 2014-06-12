@@ -9,7 +9,7 @@ import gov.nasa.jpf.symbc.numeric.SymbolicInteger;
 import java.util.Map;
 import java.util.Random;
 
-public class DbSourceInteger extends LinearIntegerExpression{
+public class DbInteger extends LinearIntegerExpression{
 	public static int UNDEFINED = Integer.MIN_VALUE;;
 	public int _min = 0;
 	public int _max = 0;
@@ -34,14 +34,14 @@ public class DbSourceInteger extends LinearIntegerExpression{
 	//		_max = MinMax.getVarMaxInt(name);
 	//	}
 
-	public DbSourceInteger (String table, 
+	public DbInteger (String table, 
 			String column) {
 		super();
 		unique_id = MinMax.UniqueId++;
 		//PathCondition.flagSolved=false;
 		//name = s;
-		this.table = table;
-		this.column = column;
+		this.table = table.toUpperCase();
+		this.column = column.toUpperCase();
 		_min = MinMax.getVarMinInt(column);
 		_max = MinMax.getVarMaxInt(column);
 		//trackedSymVars.add(fixName(name));
@@ -84,11 +84,11 @@ public class DbSourceInteger extends LinearIntegerExpression{
 	}
 
 	public boolean equals (Object o) {
-		return (o instanceof DbSourceInteger) &&
-				(this.equals((DbSourceInteger) o));
+		return (o instanceof DbInteger) &&
+				(this.equals((DbInteger) o));
 	}
 
-	private boolean equals (DbSourceInteger s) {
+	private boolean equals (DbInteger s) {
 		return this.unique_id == s.unique_id;
 	}
 
@@ -110,7 +110,7 @@ public class DbSourceInteger extends LinearIntegerExpression{
 	@Override
 	public int compareTo(Expression expr) {
 		if (expr instanceof SymbolicInteger) {
-			DbSourceInteger e = (DbSourceInteger) expr;
+			DbInteger e = (DbInteger) expr;
 			int a = unique_id;
 			int b = e.unique_id;
 			return (a < b) ? -1 : (a > b) ? 1 : 0;

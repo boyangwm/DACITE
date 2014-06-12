@@ -1,3 +1,4 @@
+package entry;
 import expression.ExprManager;
 import expression.StmtCondition;
 import gov.nasa.jpf.symbc.numeric.IntegerExpression;
@@ -7,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.constraint.ConstraintBuilder;
+
 import soot.Local;
 public class StatesOfUnit {
 
@@ -14,37 +17,37 @@ public class StatesOfUnit {
 	 * map all local variables to their expressions. 
 	 */
 	private Map<Local, IntegerExpression> mapPreState;
-	StmtCondition preCon;
+	ConstraintBuilder preCon;
 	private Map<Local, IntegerExpression> mapPostState;
-	private StmtCondition postCon;
+	private ConstraintBuilder postCon;
 	//store else branch condition 
-	private StmtCondition postBranchCon;
+	private ConstraintBuilder postBranchCon;
 
 	private boolean isBranch = false;
 
 	
-	public StmtCondition getPreCon (){
+	public ConstraintBuilder getPreCon (){
 		return preCon.make_copy();
 	}
 	
-	public StmtCondition getPostCon (){
+	public ConstraintBuilder getPostCon (){
 		return postCon.make_copy();
 	}
 	
-	public StmtCondition getPostBranchCon (){
+	public ConstraintBuilder getPostBranchCon (){
 		return postBranchCon.make_copy();
 	}
 	
 	
-	public void setPreCon (StmtCondition sc){
+	public void setPreCon (ConstraintBuilder sc){
 		preCon = sc;
 	}
 	
-	public void setPostCon (StmtCondition sc){
+	public void setPostCon (ConstraintBuilder sc){
 		postCon = sc;
 	}
 	
-	public void setPostBranchCon (StmtCondition sc){
+	public void setPostBranchCon (ConstraintBuilder sc){
 		postBranchCon = sc;
 	}
 	

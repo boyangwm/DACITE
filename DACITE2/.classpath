@@ -5,5 +5,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/soot"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jpf-core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jpf-symbc"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/KmenasWithFpgrowth"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

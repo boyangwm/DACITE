@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import com.constraint.Constraint;
+import com.constraint.ConstraintBuilder;
+
+import entry.Dacite;
 import soot.Immediate;
 import soot.Local;
 import soot.Value;
@@ -106,14 +110,20 @@ public class ExpressionUtil {
 			//<==>
 			throw new RuntimeException("## Exception: JCmpExpr type doesn't handle");
 		} else if(v instanceof JCmpgExpr){
-			throw new RuntimeException("## Exception: JCmpgExpr type doesn't handle");
+			JCmpgExpr jExpr = (JCmpgExpr) v;
+			Value op1 = jExpr.getOp1();
+			Value op2 = jExpr.getOp2();
+			IntegerExpression ie1 = transferSimpleValue(op1, expressionMap);
+			IntegerExpression ie2 = transferSimpleValue(op2, expressionMap);
+			return ie1._minus(ie2);
+			//System.out.println("retrun :" + ie1._plus(ie2));
+			//throw new RuntimeException("## Exception: JCmpgExpr type doesn't handle");
 		} else if(v instanceof JCmplExpr){
 			JCmplExpr jExpr = (JCmplExpr) v;
 			Value op1 = jExpr.getOp1();
 			Value op2 = jExpr.getOp2();
 			IntegerExpression ie1 = transferSimpleValue(op1, expressionMap);
 			IntegerExpression ie2 = transferSimpleValue(op2, expressionMap);
-			System.out.println("return  : " + ie1._minus(ie2));
 			return ie1._minus(ie2);
 		} else if(v instanceof ConditionExpr){
 			//EQ
@@ -179,7 +189,7 @@ public class ExpressionUtil {
 		else if(v instanceof InvokeExpr){
 			throw new RuntimeException("## Exception: InvokeExpr type doesn't handle");
 		}
-		
+
 		else if(v instanceof Ref){
 			throw new RuntimeException("## Exception: Ref type doesn't handle");
 		}
@@ -231,16 +241,16 @@ public class ExpressionUtil {
 			return ie; 
 		}
 		System.out.println("v : " + v.toString());
-		
-		
+
+
 		throw new RuntimeException(
 				"## Exception: transferSimpleValue type only handle simple cases");
-		
+
 	}
 
 	public static void transferConditionExp(Value condition, 
 			Map<Local,IntegerExpression> expressionMap, 
-			StmtCondition preCondition, boolean isElse)
+			ConstraintBuilder preCondition, boolean isElse)
 	{
 		//System.out.println("condition : " + condition.toString());
 		if(condition instanceof ConditionExpr){
@@ -283,45 +293,62 @@ public class ExpressionUtil {
 					"## Exception: type is not found");
 		}
 	}
-	
-	
-	
-	public static void updateAnnotationInMap(List <Value> args, Map<Local,IntegerExpression> expressionMap){
-		
+
+
+
+	public static void annotationUtilize(List <Value> args, 
+			Map<Local,IntegerExpression> expressionMap, ConstraintBuilder stmtCondition){
+
 		assert(args.get(0) instanceof StringConstant &&
 				args.get(1) instanceof StringConstant &&
 				args.get(2) instanceof StringConstant &&
 				args.get(3) instanceof IntConstant);
-		
-		
+
+
 		int isSource = ((IntConstant)args.get(3)).value; 
 		System.out.println("isSource : " +  isSource);
-		
+
 		String varName = ((StringConstant)args.get(0)).value; 
 		System.out.println("Variable Name : " +  varName);
 		String tableName = ((StringConstant)args.get(1)).value; 
 		System.out.println("Table Name : " +  tableName);
 		String colName = ((StringConstant)args.get(2)).value; 
 		System.out.println("Column Name : " +  colName);
-		
-		
-		
+
 		if(isSource == 1){
-			DbSourceInteger dbs = new DbSourceInteger(tableName, colName);
+			DbInteger dbs = new DbInteger(tableName, colName);
 			Set<Entry<Local, IntegerExpression>> set_temp = expressionMap.entrySet();
 			for (Entry<Local, IntegerExpression> e : set_temp){
 				if(e.getKey().getName().equals(varName))
 				{
 					expressionMap.put(e.getKey(), dbs);
 				}
-				
 			}
-			
-			System.out.println("Done updateAnnotationInMap");
 		}else{
+			//right
+			IntegerExpression intExp = findExpression(varName, expressionMap); 
+			DbInteger dbsink = new DbInteger(tableName, colName);
+			ConstraintBuilder RightHandSide = new ConstraintBuilder();
+			RightHandSide._addDet(Comparator.EQ, dbsink, intExp);
 			
+			Constraint c = new Constraint(stmtCondition, RightHandSide);
+			Dacite.SCConstraints.add(c);			
+
 		}
-		
+
+	}
+
+	public static IntegerExpression findExpression(String name, Map<Local,IntegerExpression> expressionMap){
+		Set<Entry<Local, IntegerExpression>> set_temp = expressionMap.entrySet();
+		for (Entry<Local, IntegerExpression> e : set_temp){
+			if(e.getKey().getName().equals(name))
+			{
+				return e.getValue();
+			}
+		}
+		// has to find a name in the map. Otherwise, annotation error. 
+		assert(false);
+		return null;
 	}
 
 
