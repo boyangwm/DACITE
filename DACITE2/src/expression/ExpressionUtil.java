@@ -24,7 +24,6 @@ import soot.jimple.InvokeExpr;
 import soot.jimple.Ref;
 import soot.jimple.StringConstant;
 import soot.jimple.internal.*;
-import gov.nasa.jpf.symbc.numeric.BinaryNonLinearIntegerExpression;
 import gov.nasa.jpf.symbc.numeric.Comparator;
 import gov.nasa.jpf.symbc.numeric.IntegerConstant;
 import gov.nasa.jpf.symbc.numeric.IntegerExpression;

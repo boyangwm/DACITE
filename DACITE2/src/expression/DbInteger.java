@@ -48,11 +48,14 @@ public class DbInteger extends LinearIntegerExpression{
 
 	}
 
-	public String getName() {
+	public String getUniqueName() {
 		//return (name != null) ? name : "INTDB_" + hashCode();
 		return (column != null) ? column : "INTDB_" + hashCode();
 	}
 
+	public String getName() {
+		return 	table + "." + column;
+	}
 
 	public String stringPC () {
 		//return (name != null) ? name : "INTDB_" + hashCode();
