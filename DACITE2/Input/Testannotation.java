@@ -29,16 +29,24 @@ public class Testannotation {
 			
 			double age =  rs.getInt("AGE");
 			DBAnnotation.annoate("age","PERSON","AGE",true);
+			
+			
+			//Testing, it not runnable.
+			int house;
 
-			double  bonus;
+			double  bonus = 0;
 			if(age > 30)
 			{
-				bonus = salary - 500;
-				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
+//				bonus = salary - 500;
+//				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
+				house = 2;
+				DBAnnotation.annoate("house","PERSON","HOUSE",false);
 			}else
 			{
-				bonus = salary - 200;
-				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
+//				bonus = salary - 200;
+//				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
+				house = 1;
+				DBAnnotation.annoate("house","PERSON","HOUSE",false);
 			}
 
 			String updateS = "UPDATE PERSON SET BONUS = ?  WHERE SSN = ?";

@@ -12,7 +12,6 @@ import solver.ProblemChocoInt;
 import gov.nasa.jpf.symbc.numeric.*;
 import static choco.Choco.*;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +28,7 @@ import com.constraint.ConstraintBuilder;
 // parses PCs
 
 public class CBParser {
+	
 	static ProblemChocoInt pb = new ProblemChocoInt();
 	//static public Map<SymbolicReal, Object>	symRealVar; // a map between symbolic real variables and DP variables
 	public static Map<String, Object>	symStringToVar; // a map between symbolic variables and DP variables
@@ -54,9 +54,9 @@ public class CBParser {
 			String name = ((DbInteger)eRef).getName();
 			Object dp_var = symStringToVar.get(name);
 			if (dp_var == null) {
-				
-				System.out.println("eRef  : " + eRef.toString());
 				dp_var = pb.makeIntVar(name, ((DbInteger)eRef)._min, ((DbInteger)eRef)._max);
+				
+				System.out.println("dp_Var hashCode : " + dp_var.hashCode());
 				symStringToVar.put(name, dp_var);
 			}
 			return dp_var;
@@ -289,15 +289,18 @@ public class CBParser {
 	}
 
 	// result is in pb
-	public static Object parse(ConstraintBuilder cb) {
+	public static ArrayList<Object> parse(ConstraintBuilder cb,  Map<String, Object> parasymStringToVar) {
+
 		
-		Object returnC = Choco.TRUE;
-		
+		//Object returnC = Choco.TRUE;
+		ArrayList<Object> returnC = new ArrayList<Object>();
+				
 		if (cb == null || cb.count == 0) {
 			return null;
 		}
 
-		symStringToVar = new HashMap<String,Object>();
+		//symStringToVar = new HashMap<String,Object>();
+		symStringToVar = parasymStringToVar;
 		//result = null;
 		tempVars = 0;
 
@@ -307,7 +310,12 @@ public class CBParser {
 
 			if (cRef instanceof LinearIntegerConstraint){
 				Object CurC = createDPLinearIntegerConstraint((LinearIntegerConstraint)cRef);// create choco linear integer constraint
-				returnC = pb.logicAnd(returnC, CurC);
+				//returnC = pb.logicAnd(returnC, CurC);
+				returnC.add(CurC);
+//				if(returnC == null)
+//					returnC = CurC;
+//				else
+//					returnC = pb.logicAnd(returnC, CurC);
 			}
 			else {
 				throw new RuntimeException("## Error: !!!!! ");
@@ -315,6 +323,8 @@ public class CBParser {
 
 			cRef = cRef.and;
 		}
+		
+		parasymStringToVar = symStringToVar;
 		return returnC;
 	}
 }
