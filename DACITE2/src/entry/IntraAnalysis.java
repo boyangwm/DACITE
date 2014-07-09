@@ -45,8 +45,8 @@ public class IntraAnalysis extends BodyTransformer{
 	private IntraAnalysis() {}
 	public static IntraAnalysis v() { return instance; }
 	static String oldPath;
+	private Body body; 
 	
-
 
 
 	Map<Unit, StatesOfUnit> mapState = new HashMap<Unit, StatesOfUnit>();
@@ -61,6 +61,10 @@ public class IntraAnalysis extends BodyTransformer{
 		mapState = new HashMap<Unit, StatesOfUnit>();
 		System.out.println("Intra-procedural analysis method name : " 
 				+ b.getMethod().getName());
+		
+		System.out.println("phaseName : " 
+				+ b.getMethod().getSignature());
+		this.body = b;
 		oneVisitAnalysis(b);
 	}
 
@@ -115,6 +119,8 @@ public class IntraAnalysis extends BodyTransformer{
 		ArrayList<Unit> visited = new ArrayList<Unit> ();
 		ArrayList<Unit> worklist = new ArrayList<Unit> ();
 		ArrayList<Unit> preWorklist = (ArrayList<Unit>) worklist.clone();
+		
+		System.out.println("####body.get method " + b.getMethod());
 
 		worklist.addAll(bugraph.getHeads());
 		init(b.getUnits(),  bugraph.getHeads(), b.getLocals());
@@ -335,6 +341,8 @@ public class IntraAnalysis extends BodyTransformer{
 					// update annotation map if it's necessary. (Source)
 					// or store the constraint. (Sink) 
 					ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition);
+					
+					
 					assert(AArgs.size() == 4);
 					for(Value vb : AArgs)
 					{

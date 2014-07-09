@@ -27,34 +27,31 @@ import expression.CBParser;
 
 public class UniversalImplication {
 
-	//	Constraint left;
-	//	Constraint right;
+	Constraint left;
+	Constraint right;
 
-	ArrayList<Object> left;
-	ArrayList<Object> right;
+	//ArrayList<Object> left;
+	//ArrayList<Object> right;
 
-	public Map<String, Object> symStringToVar = new HashMap<String,Object>();; 
-	
-	
+	public Map<String, Object> symStringToVar = new HashMap<String,Object>(); 
+	public ArrayList<String> leftVarList =  new ArrayList<String>();
+	public ArrayList<String> rightVarList =  new ArrayList<String>();
+
+
 	public UniversalImplication(){}
 
 	public UniversalImplication(ConstraintBuilder left, ConstraintBuilder right){
 
-		System.out.println("parse left...."  + left);
-		this.left =  CBParser.parse(left, symStringToVar);
-		System.out.println( "size of map " + CBParser.symStringToVar.size());
-		System.out.println("parse right...." + right );
-		this.right = CBParser.parse(right, symStringToVar);
-		System.out.println( "size of map " + CBParser.symStringToVar.size());
+		System.out.println("parse left123...."  + left);
+		System.out.println("parse right123...." + right );
 
+		Object leftO = CBParser.parse(left, symStringToVar, leftVarList);
+		assert(leftO instanceof Constraint);
+		this.left = (Constraint) leftO;
 
-		//		Object leftO = CBParser.parse(left);
-		//		assert(leftO instanceof Constraint);
-		//		this.left = (Constraint) leftO;
-		//
-		//		Object rightO = CBParser.parse(right);
-		//		assert(rightO instanceof Constraint);
-		//		this.right = (Constraint) rightO;
+		Object rightO = CBParser.parse(right, symStringToVar, rightVarList);
+		assert(rightO instanceof Constraint);
+		this.right = (Constraint) rightO;
 
 		/*
 		//testing
@@ -84,73 +81,48 @@ public class UniversalImplication {
 		 */
 	}
 
-
-	@SuppressWarnings("deprecation")
 	public boolean valid(){
 		Model m = new CPModel();
 		Solver s = new CPSolver();
-
-		//m.addConstraint(not(implies( c2, leftC)));
-		//m.addConstraint(not(implies(this.left, this.right)));
-		//m.addConstraint(and(this.left, not(this.right)));
 		
-		Constraint cleft = null;
+		m.addConstraint(not(implies(this.left, this.right)));
+		//		Object pAge = CBParser.symStringToVar.get("PERSON.AGE");
+		//		System.out.println("Hashcode: " + pAge.hashCode());
+		//		assert(pAge instanceof IntegerVariable);
+		//		IntegerVariable iage = (IntegerVariable) pAge;
+		//		
+		//		Constraint c3 =  leq(minus(iage, 30), 0);  // age <= 30
+		//		m.addConstraint(not(c3));
 
-		for(Object o : this.left)
-		{
-			assert(o instanceof Constraint);
-			System.out.println("o : " + o.toString());
-			if(cleft == null)
-				cleft = (Constraint)o;
-			else
-				cleft = and(cleft, (Constraint)o);
-		}
 
-		//System.out.println("cleft : " + cleft.toString());
-		//m.addConstraint(cleft);
+		System.out.println("solve left 123: " + this.left);
+		System.out.println("solve right 123: " + this.right);
 		
-		Constraint rC = null;
-		for(Object o : this.right)
-		{
-			assert(o instanceof Constraint);
-			if(rC == null)
-				rC = (Constraint)o;
-			else
-				rC = and(rC, (Constraint)o);
-		}
-
-		//System.out.println("rC : " + rC.toString());
-		//m.addConstraint(not(rC));
-		m.addConstraint(not(implies(cleft, rC)));
+//		System.out.println("left Var: ");
+//		for(String str : leftVarList)
+//		{
+//			System.out.println(str);
+//		}
+//		System.out.println("right Var: ");
+//		for(String str : rightVarList)
+//		{
+//			System.out.println(str);
+//		}
 		
-
-//		Object pAge = CBParser.symStringToVar.get("PERSON.AGE");
-//		System.out.println("Hashcode: " + pAge.hashCode());
-//		assert(pAge instanceof IntegerVariable);
-//		IntegerVariable iage = (IntegerVariable) pAge;
-//		
-//		Constraint c3 =  leq(minus(iage, 30), 0);  // age <= 30
-//		m.addConstraint(not(c3));
-		
-		
-		System.out.println("solve left : " + this.left);
-		System.out.println("solve right : " + this.right);
 		s.read(m);
 		s.setTimeLimit(100);
-
 		boolean solved = s.solve();
 		boolean feasible = s.isFeasible();
-		System.out.println("Feasible: " + feasible);
-
-//		Object pAge = CBParser.symStringToVar.get("PERSON.AGE");		
-//		assert(pAge instanceof IntegerVariable);
-//		IntegerVariable iage = (IntegerVariable) pAge;
-//		System.out.println("** " + s.getVar(iage).getValue());
-
-		//boolean feasible = s.isFeasible();
-		//System.out.println("Solved: " + solved);
 		//System.out.println("Feasible: " + feasible);
-		//System.out.print("solve : " + !solved);
 		return !solved;
+	}
+	
+	public boolean hasCommonVars(){
+		for(String str : leftVarList)
+		{
+			if(rightVarList.contains(str))
+				return true;
+		}
+		return false;
 	}
 }

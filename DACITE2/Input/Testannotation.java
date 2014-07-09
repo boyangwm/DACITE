@@ -27,7 +27,7 @@ public class Testannotation {
 			DBAnnotation.annoate("salary","PERSON","SALARY",true);
 
 			
-			double age =  rs.getInt("AGE");
+			double age = rs.getInt("AGE");
 			DBAnnotation.annoate("age","PERSON","AGE",true);
 			
 			
@@ -40,12 +40,13 @@ public class Testannotation {
 //				bonus = salary - 500;
 //				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
 				house = 2;
-				DBAnnotation.annoate("house","PERSON","HOUSE",false);
+				//DBAnnotation.annoate("house","PERSON","HOUSE",false);
 			}else
 			{
 //				bonus = salary - 200;
 //				DBAnnotation.annoate("bonus","PERSON","BONUS",false);
-				house = 1;
+				house = 4;
+				//house = 1;
 				DBAnnotation.annoate("house","PERSON","HOUSE",false);
 			}
 

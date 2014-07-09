@@ -3,6 +3,8 @@ import static choco.Choco.gt;
 import static choco.Choco.implies;
 import static choco.Choco.makeIntVar;
 import static choco.Choco.not;
+
+
 import expression.CBParser;
 import gov.nasa.jpf.symbc.numeric.PCParser;
 
@@ -19,6 +21,7 @@ import com.rulemanager.TableRulesManager;
 
 import solver.ProblemChocoInt;
 import solver.UniversalImplication;
+import static solver.Util.*;
 import soot.PackManager;
 import soot.Transform;
 
@@ -67,8 +70,7 @@ public class Dacite {
 			e.printStackTrace();
 		}
 
-
-		//test
+		//test___1  
 		printSCconstraints();
 		Constraint c1 = SCConstraints.get(0);
 		ConstraintBuilder c1L = c1.getLeft(); 
@@ -80,32 +82,21 @@ public class Dacite {
 			ConstraintBuilder c2L = c2.getLeft(); 
 			ConstraintBuilder c2R = c2.getRight();
 
-
-			//System.out.println("c1L : " + c1L.toString());  // ( , 30]
-			//System.out.println("c2L : " + c2L.toString());  // [20  , 29]
-
-			//UniversalImplication imp = new UniversalImplication(c1L, c2L);
 			UniversalImplication imp = new UniversalImplication(c2L, c1L);
+			//UniversalImplication imp = new UniversalImplication(c1L, c2L);
 			System.out.println("VALID ?  " + imp.valid());
 
 		}
-		//		IntegerVariable age = makeIntVar("age", -100, 100);
-		//		//IntegerVariable age2 = makeIntVar("age2", -100, 100);
-		//
-		//		Constraint c1 =  gt(age, 25);  // age > 25
-		//		Constraint c2 =  gt(age, 35);  // age > 35
-		//
-		//		m.addConstraint(not(implies(c1, c2)));
-		//		s.read(m);
-		//		s.solve();
-		//	
-		//		//System.out.print(s.getVar(v).getVal());
-		//		System.out.print("solve : " + !s.solve());
 
-
+		System.out.println("test 22222222222222222");
+		//test__2
+		System.out.println("#### Find confliction? The result :" + findConfliction(this.SCConstraints, DBConstraints, true));
 
 	}
 
+	
+	
+	
 	public void printSCconstraints(){
 		System.out.println("size : " + SCConstraints.size());
 		int i = 0;
