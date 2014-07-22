@@ -10,7 +10,9 @@ import gov.nasa.jpf.symbc.numeric.PCParser;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import choco.kernel.model.variables.integer.IntegerVariable;
 
@@ -30,11 +32,15 @@ public class Dacite {
 
 	//source code constraint
 	//it stores all constraints (DACITE format) by running the code analysis. 
-	public static List<Constraint> SCConstraints = new ArrayList<Constraint>(); 
+	public static ArrayList<Constraint> SCConstraints = new ArrayList<Constraint>(); 
+	public static Map<Constraint, String> SCCMap = new HashMap<Constraint, String>(); 
 
 	public void run(String[] args){
 		System.out.println("Run DACITE... ");
-
+		
+		long startTime = System.currentTimeMillis();
+		
+	
 		//##### 1. source code analysis #######
 		if(args.length == 0)
 		{
@@ -46,7 +52,7 @@ public class Dacite {
 		soot.Main.main(args);
 
 		//##### 2. association rule mining #######
-		List<Constraint> DBConstraints = new ArrayList<Constraint> ();
+		ArrayList<Constraint> DBConstraints = new ArrayList<Constraint> ();
 		DbRulesManager db = new DbRulesManager();
 		try {
 
@@ -71,7 +77,10 @@ public class Dacite {
 		}
 
 		//test___1  
+		
+		
 		printSCconstraints();
+		/*
 		Constraint c1 = SCConstraints.get(0);
 		ConstraintBuilder c1L = c1.getLeft(); 
 		ConstraintBuilder c1R = c1.getRight();
@@ -89,9 +98,32 @@ public class Dacite {
 		}
 
 		System.out.println("test 22222222222222222");
+		*/
 		//test__2
-		System.out.println("#### Find confliction? The result :" + findConfliction(this.SCConstraints, DBConstraints, true));
+		//System.out.println("#### Find confliction? The result :" + findConfliction(this.SCConstraints, DBConstraints, true));
 
+		boolean basedOnDB = true;
+		if(basedOnDB){
+			ArrayList<Constraint> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
+			if(conflictList.size() != 0){
+				System.out.println("#### Find conflict !!! ");
+				for(Constraint c : conflictList){
+					System.out.println("In the function : " +  SCCMap.get(c)); 
+				}
+			}else{
+				System.out.println("#### There is no conflict !!! ");
+			}
+		}else{
+			
+		}
+		
+		
+		
+		long endTime   = System.currentTimeMillis();
+		long totalTime = endTime - startTime;
+		System.out.println("time : " + totalTime/1000.0 + "s");
+
+		
 	}
 
 	

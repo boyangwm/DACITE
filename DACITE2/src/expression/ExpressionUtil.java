@@ -12,6 +12,7 @@ import com.constraint.Constraint;
 import com.constraint.ConstraintBuilder;
 
 import entry.Dacite;
+import soot.Body;
 import soot.Immediate;
 import soot.Local;
 import soot.Value;
@@ -21,6 +22,7 @@ import soot.jimple.DoubleConstant;
 import soot.jimple.FloatConstant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
+import soot.jimple.NullConstant;
 import soot.jimple.RealConstant;
 import soot.jimple.Ref;
 import soot.jimple.StringConstant;
@@ -84,7 +86,7 @@ public class ExpressionUtil {
 	 * @param v
 	 * @return
 	 */
-	public static IntegerExpression transferValueToExp(Value v, Map<Local,IntegerExpression> expressionMap){
+	public static IntegerExpression transferValueToExp(Value v, Map<Value,IntegerExpression> expressionMap){
 
 		if(v instanceof IntConstant || v instanceof JimpleLocal
 				||  v instanceof RealConstant ){
@@ -212,7 +214,7 @@ public class ExpressionUtil {
 	 * @param expressionMap
 	 * @return
 	 */
-	public static IntegerExpression transferSimpleValue(Value v, Map<Local,IntegerExpression> expressionMap)
+	public static IntegerExpression transferSimpleValue(Value v, Map<Value,IntegerExpression> expressionMap)
 	//change to Local
 	{
 		if(v instanceof IntConstant){
@@ -241,6 +243,10 @@ public class ExpressionUtil {
 			IntegerExpression ie = makeIntConst(i);
 			return ie; 
 		}
+		if(v instanceof NullConstant){
+			
+		}
+		
 		System.out.println("v : " + v.toString());
 
 
@@ -250,7 +256,7 @@ public class ExpressionUtil {
 	}
 
 	public static void transferConditionExp(Value condition, 
-			Map<Local,IntegerExpression> expressionMap, 
+			Map<Value,IntegerExpression> expressionMap, 
 			ConstraintBuilder preCondition, boolean isElse)
 	{
 		//System.out.println("condition : " + condition.toString());
@@ -259,6 +265,11 @@ public class ExpressionUtil {
 			Value op1 = cExp.getOp1();
 			IntegerExpression ie1 = transferSimpleValue(op1, expressionMap);
 			Value op2 = cExp.getOp2();
+			if(op2 instanceof NullConstant){
+				//temp$1 != null
+				return;
+				
+			}
 			IntegerExpression ie2 = transferSimpleValue(op2, expressionMap);
 			if(!isElse){
 				if(cExp instanceof JLtExpr){
@@ -298,7 +309,7 @@ public class ExpressionUtil {
 
 
 	public static void annotationUtilize(List <Value> args, 
-			Map<Local,IntegerExpression> expressionMap, ConstraintBuilder stmtCondition){
+			Map<Value,IntegerExpression> expressionMap, ConstraintBuilder stmtCondition, Body b){
 
 		assert(args.get(0) instanceof StringConstant &&
 				args.get(1) instanceof StringConstant &&
@@ -318,12 +329,21 @@ public class ExpressionUtil {
 
 		if(isSource == 1){
 			DbInteger dbs = new DbInteger(tableName, colName);
-			Set<Entry<Local, IntegerExpression>> set_temp = expressionMap.entrySet();
-			for (Entry<Local, IntegerExpression> e : set_temp){
-				if(e.getKey().getName().equals(varName))
-				{
-					expressionMap.put(e.getKey(), dbs);
+			Set<Entry<Value, IntegerExpression>> set_temp = expressionMap.entrySet();
+			for (Entry<Value, IntegerExpression> e : set_temp){
+				Value key = e.getKey();
+				if(key instanceof Local){
+					Local l = (Local)key;
+					if(l.getName().equals(varName))
+					{
+						expressionMap.put(e.getKey(), dbs);
+					}
 				}
+				//not all are Local now_140721
+//				else{
+//					throw new RuntimeException(
+//							"## Exception: not handle feild right now!");
+//				}
 			}
 		}else{
 			//right
@@ -331,23 +351,30 @@ public class ExpressionUtil {
 			DbInteger dbsink = new DbInteger(tableName, colName);
 			ConstraintBuilder RightHandSide = new ConstraintBuilder();
 			RightHandSide._addDet(Comparator.EQ, dbsink, intExp);
-			
+
 			Constraint c = new Constraint(stmtCondition, RightHandSide);
-			Dacite.SCConstraints.add(c);			
+			Dacite.SCConstraints.add(c);		
+			Dacite.SCCMap.put(c, b.getMethod().getSignature());
 
 		}
 
 	}
 
-	public static IntegerExpression findExpression(String name, Map<Local,IntegerExpression> expressionMap){
-		Set<Entry<Local, IntegerExpression>> set_temp = expressionMap.entrySet();
-		for (Entry<Local, IntegerExpression> e : set_temp){
-			if(e.getKey().getName().equals(name))
-			{
-				return e.getValue();
+	public static IntegerExpression findExpression(String name, Map<Value,IntegerExpression> expressionMap){
+		Set<Entry<Value, IntegerExpression>> set_temp = expressionMap.entrySet();
+		for (Entry<Value, IntegerExpression> e : set_temp){
+			//if(e.getKey().getName().equals(name))
+			Value key = e.getKey();
+			if(key instanceof Local){
+				Local l = (Local)key;
+				if(l.getName().equals(name))
+				{
+					return e.getValue();
+				}
 			}
 		}
 		// has to find a name in the map. Otherwise, annotation error. 
+		// not handle feild right now!
 		assert(false);
 		return null;
 	}

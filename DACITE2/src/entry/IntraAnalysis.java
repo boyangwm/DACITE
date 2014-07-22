@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.constraint.ConstraintBuilder;
 
@@ -32,6 +33,7 @@ import soot.jimple.internal.JReturnVoidStmt;
 import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JTableSwitchStmt;
 import soot.jimple.internal.JThrowStmt;
+import soot.shimple.ShimpleExpr;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.util.Chain;
 import expression.StmtCondition;
@@ -46,7 +48,7 @@ public class IntraAnalysis extends BodyTransformer{
 	public static IntraAnalysis v() { return instance; }
 	static String oldPath;
 	private Body body; 
-	
+
 
 
 	Map<Unit, StatesOfUnit> mapState = new HashMap<Unit, StatesOfUnit>();
@@ -61,9 +63,18 @@ public class IntraAnalysis extends BodyTransformer{
 		mapState = new HashMap<Unit, StatesOfUnit>();
 		System.out.println("Intra-procedural analysis method name : " 
 				+ b.getMethod().getName());
-		
+
 		System.out.println("phaseName : " 
 				+ b.getMethod().getSignature());
+
+
+		//********************
+//		Scanner in=new Scanner(System.in);
+//		System.out.println("please input a float number");  
+//		float a=in.nextFloat(); 
+//		System.out.println(a);
+		//********************
+
 		this.body = b;
 		oneVisitAnalysis(b);
 	}
@@ -80,7 +91,7 @@ public class IntraAnalysis extends BodyTransformer{
 
 		for(Unit unit : heads){
 			Iterator<Local> it =locals.iterator();
-			Map<Local, IntegerExpression> map = new HashMap<Local, IntegerExpression>();
+			Map<Value, IntegerExpression> map = new HashMap<Value, IntegerExpression>();
 			while(it.hasNext()) {
 				Local var = it.next();
 				//System.out.println(var.toString());
@@ -101,7 +112,7 @@ public class IntraAnalysis extends BodyTransformer{
 			Unit stmt = (Unit) stmtIt.next();
 			//initialize pre-conditions for all statements
 			if(!mapState.containsKey(stmt)){
-				Map<Local, IntegerExpression> map = new HashMap<Local, IntegerExpression>();
+				Map<Value, IntegerExpression> map = new HashMap<Value, IntegerExpression>();
 				StatesOfUnit sou = new StatesOfUnit(map);
 				mapState.put(stmt, sou);
 			}
@@ -119,7 +130,7 @@ public class IntraAnalysis extends BodyTransformer{
 		ArrayList<Unit> visited = new ArrayList<Unit> ();
 		ArrayList<Unit> worklist = new ArrayList<Unit> ();
 		ArrayList<Unit> preWorklist = (ArrayList<Unit>) worklist.clone();
-		
+
 		System.out.println("####body.get method " + b.getMethod());
 
 		worklist.addAll(bugraph.getHeads());
@@ -218,7 +229,7 @@ public class IntraAnalysis extends BodyTransformer{
 		try{
 			for(Unit pre : preds) {
 				StatesOfUnit souPre = mapState.get(pre);
-				Map<Local, IntegerExpression> prePostState = souPre.getPost();
+				Map<Value, IntegerExpression> prePostState = souPre.getPost();
 
 				//has to change latter. This is meet operation.
 				//For now, we only consider on predecessor. 
@@ -258,45 +269,61 @@ public class IntraAnalysis extends BodyTransformer{
 	private void analyzeStmt(Stmt stmt){
 		//System.out.println("************* analyzeStmt **************");
 		if (stmt instanceof JAssignStmt)	{
-
-
-
 			JAssignStmt as =  (JAssignStmt)stmt;
 			Value vLeft = as.getLeftOp();
 			Value vRight = as.getRightOp();
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
+
 			// Cast
 			if(vRight instanceof JCastExpr){
 				JCastExpr castR = (JCastExpr)vRight;
 				Value orgValue = castR.getOp();
 				IntegerExpression newExp = ExpressionUtil.transferValueToExp(orgValue, preState);
-				Map<Local, IntegerExpression> postState = preState;
-				postState.put((Local)vLeft, newExp);
+				Map<Value, IntegerExpression> postState = preState;
+				postState.put(vLeft, newExp);
 				sou.updatePostState(postState);
 			} 
 			else if(vRight instanceof Ref || 
-					vRight instanceof InvokeExpr){
+					vRight instanceof InvokeExpr ||
+					vRight instanceof NewExpr ||
+					vRight instanceof NewArrayExpr ||
+					vRight instanceof LengthExpr){
+				//NewExpr: temp$0 = new Model.OrderType$Type
+				//NewArrayExpr: temp$2 = newarray (Model.OrderType$Type)[2]
+				//LengthExpr : temp$0 = lengthof args 
+
 				sou.updatePostState(preState);
 			}else if (vRight instanceof Immediate)
 			{
 				System.out.println("Right is Immediate :" + stmt.toString());
-				if(vRight instanceof StringConstant)
+
+				if(vRight instanceof StringConstant ||
+						vRight instanceof NullConstant)
 				{
 					sou.updatePostState(preState);
 				}else
 				{
 					IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
-					Map<Local, IntegerExpression> postState = preState;
-					postState.put((Local)vLeft, newExp);
+					Map<Value, IntegerExpression> postState = preState;
+					postState.put(vLeft, newExp);
 					sou.updatePostState(postState);
 				}
+			}else if (vRight instanceof InstanceOfExpr)
+			{
+				//example, temp$25 = temp$24 instanceof Model.PaymentMethod
+				InstanceOfExpr right = (InstanceOfExpr)vRight;
+				IntegerExpression newExp = ExpressionUtil.transferValueToExp(right.getOp(), preState);
+				Map<Value, IntegerExpression> postState = preState;
+				postState.put(vLeft, newExp);
+				sou.updatePostState(postState);
+
 			}else
 			{
 
 				IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
-				Map<Local, IntegerExpression> postState = preState;
-				postState.put((Local)vLeft, newExp);
+				Map<Value, IntegerExpression> postState = preState;
+				postState.put(vLeft, newExp);
 				sou.updatePostState(postState);
 			}
 			//condition part
@@ -307,14 +334,14 @@ public class IntraAnalysis extends BodyTransformer{
 			//throw new RuntimeException("## Error: does not handle IdentityStmt");
 			//all ids have been initialized to point itself
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			sou.updatePostState(preState);
 			//condition part
 			sou.setPostCon(sou.getPreCon());
 			sou.setIsBranch(false);
 		}else if(stmt instanceof JReturnVoidStmt){
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			sou.updatePostState(preState);
 			//condition part
 			sou.setPostCon(sou.getPreCon());
@@ -322,7 +349,7 @@ public class IntraAnalysis extends BodyTransformer{
 		}else if(stmt instanceof JInvokeStmt){
 			//such as "specialinvoke this.<java.lang.Object: void <init>()>()"
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			ConstraintBuilder stmtCondition = sou.getPreCon();
 
 			System.out.println("JinvokeStmt");
@@ -334,15 +361,18 @@ public class IntraAnalysis extends BodyTransformer{
 				System.out.println("JStaticInvokeExpr to string : " + gNewInv.toString());
 				SootMethodRef mRef = gNewInv.getMethodRef();
 				System.out.println( "signiture : " + mRef.getSignature());
-				if(mRef.getSignature().equals("<DBAnnotation: void annoate(java.lang.String,java.lang.String,java.lang.String,boolean)>"))
+				//if(mRef.getSignature().equals("<DBAnnotation: void annoate(java.lang.String,java.lang.String,java.lang.String,boolean)>"))
+				if(mRef.getSignature().contains("DBAnnotation: void annoate(java.lang.String,java.lang.String,java.lang.String,boolean)>"))
 				{
-					System.out.println( "annotation invoke !!!");
+					//System.out.println( "annotation invoke !!!");
+					//throw new RuntimeException("## debugging!!!!");
+
 					List <Value> AArgs = gNewInv.getArgs();
 					// update annotation map if it's necessary. (Source)
 					// or store the constraint. (Sink) 
-					ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition);
-					
-					
+					ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition, this.body);
+
+
 					assert(AArgs.size() == 4);
 					for(Value vb : AArgs)
 					{
@@ -361,7 +391,7 @@ public class IntraAnalysis extends BodyTransformer{
 		}else if(stmt instanceof JIfStmt){
 			JIfStmt ifStmt = (JIfStmt)stmt;
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			sou.updatePostState(preState);
 
 			//condition part
@@ -386,7 +416,7 @@ public class IntraAnalysis extends BodyTransformer{
 			throw new RuntimeException("## Error: does not handle JExitMonitorStmt");
 		}else if(stmt instanceof JNopStmt){
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			sou.updatePostState(preState);
 			//condition part
 			sou.setPostCon(sou.getPreCon());
@@ -394,17 +424,29 @@ public class IntraAnalysis extends BodyTransformer{
 		}else if(stmt instanceof JRetStmt){
 			throw new RuntimeException("## Error: does not handle RetStmt");
 		}else if(stmt instanceof JReturnStmt){
-			throw new RuntimeException("## Error: does not handle ReturnStmt");
+			//example, return temp$2 
+			StatesOfUnit sou = mapState.get(stmt);
+			Map<Value, IntegerExpression> preState = sou.getPre();
+			sou.updatePostState(preState);
+			//condition part
+			sou.setPostCon(sou.getPreCon());
+			sou.setIsBranch(false);
 		}else if(stmt instanceof JTableSwitchStmt){
 			throw new RuntimeException("## Error: does not handle TableSwitchStmt");
 		}else if(stmt instanceof JThrowStmt){
-			throw new RuntimeException("## Error: does not handle ThrowStmt");
+			//example, throw temp$2
+			StatesOfUnit sou = mapState.get(stmt);
+			Map<Value, IntegerExpression> preState = sou.getPre();
+			sou.updatePostState(preState);
+			//condition part
+			sou.setPostCon(sou.getPreCon());
+			sou.setIsBranch(false);
 		}else if(stmt instanceof JBreakpointStmt){
 			throw new RuntimeException("## Error: does not handle JBreakpointStmt");
 		}else if(stmt instanceof JGotoStmt){
 			//JGotoStmt gotoStmt = (JGotoStmt)stmt;
 			StatesOfUnit sou = mapState.get(stmt);
-			Map<Local, IntegerExpression> preState = sou.getPre();
+			Map<Value, IntegerExpression> preState = sou.getPre();
 			sou.updatePostState(preState);
 			sou.setPostCon(sou.getPreCon());
 			sou.setIsBranch(true);
