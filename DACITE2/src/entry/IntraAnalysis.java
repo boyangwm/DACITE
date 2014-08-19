@@ -1,10 +1,12 @@
 package entry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import com.constraint.ConstraintBuilder;
 
@@ -12,10 +14,13 @@ import soot.Body;
 import soot.BodyTransformer;
 import soot.Immediate;
 import soot.Local;
+import soot.SootFieldRef;
 import soot.SootMethodRef;
 import soot.Unit;
 import soot.Value;
+import soot.dava.internal.javaRep.DStaticFieldRef;
 import soot.jimple.*;
+import soot.jimple.internal.AbstractInstanceFieldRef;
 import soot.jimple.internal.JAssignStmt;
 import soot.jimple.internal.JBreakpointStmt;
 import soot.jimple.internal.JCastExpr;
@@ -24,6 +29,7 @@ import soot.jimple.internal.JExitMonitorStmt;
 import soot.jimple.internal.JGotoStmt;
 import soot.jimple.internal.JIdentityStmt;
 import soot.jimple.internal.JIfStmt;
+import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JLookupSwitchStmt;
 import soot.jimple.internal.JNopStmt;
@@ -52,6 +58,7 @@ public class IntraAnalysis extends BodyTransformer{
 
 
 	Map<Unit, StatesOfUnit> mapState = new HashMap<Unit, StatesOfUnit>();
+	Set<Value> assertValueList = new HashSet<Value>();
 
 	protected void internalTransform(Body b, String phaseName, Map options)
 	{
@@ -69,10 +76,10 @@ public class IntraAnalysis extends BodyTransformer{
 
 
 		//********************
-//		Scanner in=new Scanner(System.in);
-//		System.out.println("please input a float number");  
-//		float a=in.nextFloat(); 
-//		System.out.println(a);
+		//		Scanner in=new Scanner(System.in);
+		//		System.out.println("please input a float number");  
+		//		float a=in.nextFloat(); 
+		//		System.out.println(a);
 		//********************
 
 		this.body = b;
@@ -275,6 +282,7 @@ public class IntraAnalysis extends BodyTransformer{
 			StatesOfUnit sou = mapState.get(stmt);
 			Map<Value, IntegerExpression> preState = sou.getPre();
 
+			System.out.println("This is JAssignStmt...");
 			// Cast
 			if(vRight instanceof JCastExpr){
 				JCastExpr castR = (JCastExpr)vRight;
@@ -292,11 +300,25 @@ public class IntraAnalysis extends BodyTransformer{
 				//NewExpr: temp$0 = new Model.OrderType$Type
 				//NewArrayExpr: temp$2 = newarray (Model.OrderType$Type)[2]
 				//LengthExpr : temp$0 = lengthof args 
+				if(vRight instanceof StaticFieldRef){
+					SootFieldRef fr = ((StaticFieldRef) vRight).getFieldRef();
+					fr.getSignature();
+					System.out.println("This is JAssignStmt pos 1...");
+					//if(fr.getSignature().equals("<Testannotation: boolean $assertionsDisabled>"))
+					if(fr.getSignature().contains("assertion"))
+					{
+						assertValueList.add(vLeft);
 
+					}
+
+				}
 				sou.updatePostState(preState);
 			}else if (vRight instanceof Immediate)
 			{
 				System.out.println("Right is Immediate :" + stmt.toString());
+				if(vRight instanceof Constant){
+					System.out.println("constant");
+				}
 
 				if(vRight instanceof StringConstant ||
 						vRight instanceof NullConstant)
@@ -397,15 +419,31 @@ public class IntraAnalysis extends BodyTransformer{
 			//condition part
 			ConstraintBuilder newCon = sou.getPreCon();
 			Value curCon = ifStmt.getCondition();
+
+			//IsAssert
+			boolean isAssert = false;
+			if(curCon instanceof ConditionExpr){
+				ConditionExpr cExp = (ConditionExpr)curCon;
+				Value op1 = cExp.getOp1();
+				if(this.assertValueList.contains(op1))
+				{
+					isAssert = true;
+				}
+			}
+
 			//System.out.println("preCon 1-1  :" + newCon.toString());
-			transferConditionExp(curCon, preState, newCon, false);
+			if(!isAssert){
+				transferConditionExp(curCon, preState, newCon, false);
+			}
 			sou.setPostCon(newCon);
 			sou.setIsBranch(true);
 			//System.out.println("preCon 1-2  :" + newCon.toString());
 
 			ConstraintBuilder newBranchCon = sou.getPreCon();
 			//System.out.println("preCon 2-1  :" + newBranchCon.toString());
-			transferConditionExp(curCon, preState, newBranchCon, true);
+			if(!isAssert){
+				transferConditionExp(curCon, preState, newBranchCon, true);
+			}
 			sou.setPostBranchCon(newBranchCon);
 			//System.out.println("preCon 2-2  :" + newBranchCon.toString());
 		}else if(stmt instanceof JLookupSwitchStmt){

@@ -1,10 +1,15 @@
 package solver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.constraint.Constraint;
 import com.constraint.ConstraintBuilder;
+
+import entry.ReportRecord;
 
 public class Util {
 
@@ -13,10 +18,11 @@ public class Util {
 	 * @param DBConstraints
 	 * @param basedOnList2  true if DB is what we believe
 	 */
-	public static ArrayList<Constraint> findConfliction(ArrayList<Constraint> CList1, 
+	public static ArrayList<ReportRecord> findConfliction(ArrayList<Constraint> CList1, 
 			ArrayList<Constraint> CList2,  boolean basedOnList2){
 		
-		ArrayList<Constraint> conflictList = new ArrayList<Constraint>();
+		//ArrayList<Constraint> conflictList = new ArrayList<Constraint>();
+		ArrayList<ReportRecord> conflictRecord = new ArrayList<ReportRecord>();
 		if(basedOnList2){
 			for(Constraint cDB : CList2){
 				for(Constraint cCS : CList1){
@@ -24,22 +30,29 @@ public class Util {
 					if(b){
 //						System.out.println("123 *****************");
 //						return true;
-						conflictList.add(cCS);
+						
+						String str = "SC rule: " + cCS.toString() +"\n";
+						str += "DB rule: " + cDB.toString() + "\n";
+					
+						ReportRecord rr = new ReportRecord(cCS, str);
+						conflictRecord.add(rr);
 					}
 				}
 			}
 		}else
 		{
+			assert(false);
+			
 			for(Constraint cCS : CList1){
 				for(Constraint cDB : CList2){
 					boolean b = c1Againstc2(cDB, cCS);
-					if(b)
+					if(b){}
 						//return true;
-						conflictList.add(cDB);
+						//conflictList.add(cDB);
 				}
 			}
 		}
-		return conflictList;
+		return conflictRecord;
 	}
 
 	public static boolean c1Againstc2(Constraint c1, Constraint c2)
@@ -59,7 +72,7 @@ public class Util {
 		
 		if(imp1.hasCommonVars() && imp2.hasCommonVars()){
 			if(imp1.valid() && !imp2.valid()){
-				System.out.println("11**************");
+				//System.out.println("11**************");
 				return true;
 			}
 		}

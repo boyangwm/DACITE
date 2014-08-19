@@ -42,8 +42,8 @@ public class UniversalImplication {
 
 	public UniversalImplication(ConstraintBuilder left, ConstraintBuilder right){
 
-		System.out.println("parse left123...."  + left);
-		System.out.println("parse right123...." + right );
+		//System.out.println("parse left123...."  + left);
+		//System.out.println("parse right123...." + right );
 
 		Object leftO = CBParser.parse(left, symStringToVar, leftVarList);
 		assert(leftO instanceof Constraint);
@@ -84,7 +84,7 @@ public class UniversalImplication {
 	public boolean valid(){
 		Model m = new CPModel();
 		Solver s = new CPSolver();
-		
+
 		m.addConstraint(not(implies(this.left, this.right)));
 		//		Object pAge = CBParser.symStringToVar.get("PERSON.AGE");
 		//		System.out.println("Hashcode: " + pAge.hashCode());
@@ -95,28 +95,34 @@ public class UniversalImplication {
 		//		m.addConstraint(not(c3));
 
 
-		System.out.println("solve left 123: " + this.left);
-		System.out.println("solve right 123: " + this.right);
-		
-//		System.out.println("left Var: ");
-//		for(String str : leftVarList)
-//		{
-//			System.out.println(str);
-//		}
-//		System.out.println("right Var: ");
-//		for(String str : rightVarList)
-//		{
-//			System.out.println(str);
-//		}
-		
+		//System.out.println("solve left 123: " + this.left);
+		//System.out.println("solve right 123: " + this.right);
+
+		//		System.out.println("left Var: ");
+		//		for(String str : leftVarList)
+		//		{
+		//			System.out.println(str);
+		//		}
+		//		System.out.println("right Var: ");
+		//		for(String str : rightVarList)
+		//		{
+		//			System.out.println(str);
+		//		}
+
 		s.read(m);
 		s.setTimeLimit(100);
-		boolean solved = s.solve();
+		boolean solved = false;
+		try{
+			solved = s.solve();
+		}catch(Exception ex){
+			System.out.println("false : " + this.left + this.right);
+			return false;
+		}
 		boolean feasible = s.isFeasible();
 		//System.out.println("Feasible: " + feasible);
 		return !solved;
 	}
-	
+
 	public boolean hasCommonVars(){
 		for(String str : leftVarList)
 		{

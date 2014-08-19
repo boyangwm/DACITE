@@ -60,7 +60,7 @@ public class CBParser {
 			if (dp_var == null) {
 				dp_var = pb.makeIntVar(name, ((DbInteger)eRef)._min, ((DbInteger)eRef)._max);
 
-				System.out.println("dp_Var hashCode : " + dp_var.hashCode());
+				//System.out.println("dp_Var hashCode : " + dp_var.hashCode());
 				symStringToVar.put(name, dp_var);
 			}
 			if(!varList.contains(name))

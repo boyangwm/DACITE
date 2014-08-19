@@ -30,16 +30,20 @@ import soot.Transform;
 
 public class Dacite {
 
+	public long totalTime;
 	//source code constraint
 	//it stores all constraints (DACITE format) by running the code analysis. 
 	public static ArrayList<Constraint> SCConstraints = new ArrayList<Constraint>(); 
 	public static Map<Constraint, String> SCCMap = new HashMap<Constraint, String>(); 
+	
+	public ArrayList <String> conflictFunctions = new ArrayList<String>();
 
-	public void run(String[] args){
+	public void run(String[] args, int k, double minsupp, double minconf){
 		System.out.println("Run DACITE... ");
 		
 		long startTime = System.currentTimeMillis();
 		
+		soot.G.reset();
 	
 		//##### 1. source code analysis #######
 		if(args.length == 0)
@@ -47,8 +51,18 @@ public class Dacite {
 			System.out.println("Syntax: java Main <classfile> [soot options]");
 			System.exit(0);
 		}
+		try{
 		PackManager.v().getPack("jtp").add(new Transform("jtp.StmtIteration", 
 				IntraAnalysis.v()));
+		}catch(RuntimeException ex){
+			
+			System.out.println(ex.getMessage());
+			System.out.println("stop");
+			//if(ex.getMessage().equals(anObject))
+			
+		}
+		
+		
 		soot.Main.main(args);
 
 		//##### 2. association rule mining #######
@@ -61,15 +75,25 @@ public class Dacite {
 					+ "\\KmenasWithFpgrowth\\config.txt");
 			String input = file.getAbsolutePath();
 
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "boyangtest", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "boyangtest", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "sakila", "root", "boyang", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
+			
 			db.ImportConfig(input);
-			db.Run(2, 0.1, 0.1);
-			TableRulesManager trm = db.getTable("person");
+			//db.Run(2, 0.1, 0.1);   original
+			//db.Run(4, 0.10, 0.6);
+			db.Run(k, minsupp, minconf);
+			ArrayList<String> strTables = db.GetAllTableNames();
+			for(String strName : strTables){
+				TableRulesManager trm = db.getTable(strName);
+				DBConstraints.addAll(trm.getConstraints());	
+			}
+			
 
-			DBConstraints = trm.getConstraints();
+			
 			int i = 0;
 			for(Constraint constraint : DBConstraints){
-				System.out.println("Rule " + i++ + " : " + constraint.toString());
+				System.out.println("DB Rule " + i++ + " : " + constraint.toString());
 			}	
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -104,11 +128,20 @@ public class Dacite {
 
 		boolean basedOnDB = true;
 		if(basedOnDB){
-			ArrayList<Constraint> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
+			ArrayList<ReportRecord> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
 			if(conflictList.size() != 0){
-				System.out.println("#### Find conflict !!! ");
-				for(Constraint c : conflictList){
-					System.out.println("In the function : " +  SCCMap.get(c)); 
+				System.out.println("\n\n#### Find conflicts !!! #######");
+				int counter = 0;
+				for(ReportRecord rr : conflictList){
+					//System.out.println("======= record " + counter++ +  "========");
+					Constraint c = rr.getConstraint();
+					//System.out.println("In the function : " +  SCCMap.get(c)); 
+					if(!conflictFunctions.contains(SCCMap.get(c)))
+					{	
+						conflictFunctions.add(SCCMap.get(c));
+					}
+					//System.out.println(rr.getRules());
+					//System.out.println("===============");
 				}
 			}else{
 				System.out.println("#### There is no conflict !!! ");
@@ -120,8 +153,14 @@ public class Dacite {
 		
 		
 		long endTime   = System.currentTimeMillis();
-		long totalTime = endTime - startTime;
+		totalTime = endTime - startTime;
+		
 		System.out.println("time : " + totalTime/1000.0 + "s");
+		
+		
+		for(String str: conflictFunctions){
+			System.out.println(str);
+		}
 
 		
 	}
