@@ -1,21 +1,21 @@
 Incorrect
-<Model.Person: void updateStore_IDToOne(java.lang.String)>
-<Model.Person: void updateTimeSLOTLS35(java.lang.String)>
-<Model.Person: void updateTimeSLOTGT35(java.lang.String)>
-<Model.Person: void updateMarriedGT35(java.lang.String)>
-<Model.Person: void updateMarriedLS35(java.lang.String)>
-<Model.Person: void updateVisitTimeLS45(java.lang.String)>
-<Model.Person: void updateVisitTimeGT45(java.lang.String)>
-<Model.Person: void updateNumberAccountLT35(java.lang.String)>
-<Model.Person: void updateNumberAccountGT35(java.lang.String)>
+<com.umas.code.People: void updateGraduateLT25(java.lang.String)>
+<com.umas.code.People: void updateLocationZoneGrad(java.lang.String)>
+<com.umas.code.People: void updateCreditsGrad(java.lang.String)>
+<com.umas.code.People: void updateMarriageLT25(java.lang.String)>
+<com.umas.code.People: void updateParkingGT30(java.lang.String)>
+<com.umas.code.Professor: void updateTitleGT50(java.lang.String)>
+<com.umas.code.Professor: void updateSalaryGT50(java.lang.String)>
+<com.umas.code.Department: void updateDepLT250(java.lang.String)>
+<com.umas.code.Department: void updateDutyGT600(java.lang.String)>
 
 Correct
-<Model.Person: void updateStore_IDToOne2Correct(java.lang.String)>
-<Model.Person: void TimeSlotToTwo(java.lang.String)>
-<Model.Person: void UpdateMarriageToOne(java.lang.String)>
-<Model.Person: void updateVisitTimeTo2(java.lang.String)>
-<Model.Person: void updateNumberAccountTo2(java.lang.String)>
-<Model.MovieData: void updateNumberAccountTo2(int)>
-<Model.MovieData: void updateRenttime(int)>
-<Model.MovieData: void updateLocationToTwo(int)>
-<Model.MovieData: void updateYearTo2001(int)>
+<com.umas.code.People: void updateGraduateOne(java.lang.String)>
+<com.umas.code.People: void updateLocationTwo(java.lang.String)>
+<com.umas.code.People: void updatecredits15(java.lang.String)>
+<com.umas.code.People: void updateMarriageGTOne(java.lang.String)>
+<com.umas.code.People: void updateParkingThree(java.lang.String)>
+<com.umas.code.Professor: void updateTitleTwo(java.lang.String)>
+<com.umas.code.Professor: void updateSalary4000(java.lang.String)>
+<com.umas.code.Department: void updateDepThree(java.lang.String)>
+<com.umas.code.Department: void updateDutyOne(java.lang.String)>
