@@ -31,7 +31,7 @@ public class Run {
 			BufferedWriter bw = new BufferedWriter(fw);
 
 
-			for(double d = 0.20; d < 0.21; d+=0.01){
+			for(double d = 0.20; d <  0.21; d+=0.01){
 				Dacite dc = new Dacite();
 				dc.run(args, 4, d, 0.6);
 				double recall = expEnv.computeRecall(dc.conflictFunctions);
