@@ -31,7 +31,7 @@ public class Run {
 			BufferedWriter bw = new BufferedWriter(fw);
 
 
-			for(double d = 0.29; d < 0.30; d+=0.01){
+			for(double d = 0.20; d < 0.21; d+=0.01){
 				Dacite dc = new Dacite();
 				dc.run(args, 4, d, 0.6);
 				double recall = expEnv.computeRecall(dc.conflictFunctions);
@@ -47,7 +47,7 @@ public class Run {
 				bw.write("\n" + "4\t" + d + "\t 0.6\t");
 				bw.write(recall+ "\t");
 				bw.write(fpratio+ "\t");
-				bw.write(dc.totalTime + "s"+ "\t");
+				bw.write(dc.totalTime/1000 + "s"+ "\t");
 				
 //				bw.write("\n" + "\n"+ "\n" + "4, " + d + ", 0.6" + "\n");
 //				bw.write("recall : " + recall+ "\n");

@@ -40,6 +40,7 @@ import soot.jimple.internal.JStaticInvokeExpr;
 import soot.jimple.internal.JTableSwitchStmt;
 import soot.jimple.internal.JThrowStmt;
 import soot.shimple.ShimpleExpr;
+import soot.shimple.toolkits.scalar.SEvaluator.MetaConstant;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.util.Chain;
 import expression.StmtCondition;
@@ -316,9 +317,6 @@ public class IntraAnalysis extends BodyTransformer{
 			}else if (vRight instanceof Immediate)
 			{
 				System.out.println("Right is Immediate :" + stmt.toString());
-				if(vRight instanceof Constant){
-					System.out.println("constant");
-				}
 
 				if(vRight instanceof StringConstant ||
 						vRight instanceof NullConstant)
@@ -388,18 +386,27 @@ public class IntraAnalysis extends BodyTransformer{
 				{
 					//System.out.println( "annotation invoke !!!");
 					//throw new RuntimeException("## debugging!!!!");
+					System.out.println("body name : " + this.body.getMethod().getSignature());
 
 					List <Value> AArgs = gNewInv.getArgs();
-					// update annotation map if it's necessary. (Source)
-					// or store the constraint. (Sink) 
-					ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition, this.body);
-
-
 					assert(AArgs.size() == 4);
 					for(Value vb : AArgs)
 					{
 						System.out.println( "vb.getValue() : " + vb.toString());
 					}
+
+					// update annotation map if it's necessary. (Source)
+					// or store the constraint. (Sink) 
+					// annotation should be correct
+					if(AArgs.get(1) instanceof StringConstant) {
+						ExpressionUtil.annotationUtilize(AArgs, preState, stmtCondition, this.body);
+					}else
+					{
+						//error 
+						// some annotation is not correct. 
+						// DBAnnotation.annoate("examName", tableName, "ExamName", false);
+					}
+
 
 				}
 

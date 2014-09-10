@@ -77,7 +77,10 @@ public class Dacite {
 
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "boyangtest", "root", "boyang", "com.mysql.jdbc.Driver");
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "sakila", "root", "boyang", "com.mysql.jdbc.Driver");
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
+			//potholes
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata2", "root", "boyang", "com.mysql.jdbc.Driver");
+			
 			
 			db.ImportConfig(input);
 			//db.Run(2, 0.1, 0.1);   original
@@ -101,9 +104,10 @@ public class Dacite {
 		}
 
 		//test___1  
-		
-		
+		//back
 		printSCconstraints();
+		
+		
 		/*
 		Constraint c1 = SCConstraints.get(0);
 		ConstraintBuilder c1L = c1.getLeft(); 

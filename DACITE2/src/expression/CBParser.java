@@ -327,7 +327,7 @@ public class CBParser {
 					returnC = pb.logicAnd(returnC, CurC);
 			}
 			else {
-				throw new RuntimeException("## Error: !!!!! ");
+				throw new RuntimeException("## Error: Not LinearIntegerConstraint !!!!! ");
 			}
 
 			cRef = cRef.and;

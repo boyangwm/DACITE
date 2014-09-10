@@ -22,6 +22,7 @@ import soot.jimple.DoubleConstant;
 import soot.jimple.FloatConstant;
 import soot.jimple.IntConstant;
 import soot.jimple.InvokeExpr;
+import soot.jimple.LongConstant;
 import soot.jimple.NullConstant;
 import soot.jimple.RealConstant;
 import soot.jimple.Ref;
@@ -89,7 +90,8 @@ public class ExpressionUtil {
 	public static IntegerExpression transferValueToExp(Value v, Map<Value,IntegerExpression> expressionMap){
 
 		if(v instanceof IntConstant || v instanceof JimpleLocal
-				||  v instanceof RealConstant ){
+				||  v instanceof RealConstant 
+				|| v instanceof LongConstant){
 			return transferSimpleValue(v, expressionMap);
 		}	
 		//all BinopExpr cases
@@ -239,6 +241,12 @@ public class ExpressionUtil {
 		}
 		if(v instanceof FloatConstant){
 			FloatConstant fc = (FloatConstant)v;
+			int i = (int)(fc.value);
+			IntegerExpression ie = makeIntConst(i);
+			return ie; 
+		}
+		if(v instanceof LongConstant){
+			LongConstant fc = (LongConstant)v;
 			int i = (int)(fc.value);
 			IntegerExpression ie = makeIntConst(i);
 			return ie; 
