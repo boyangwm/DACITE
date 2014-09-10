@@ -388,7 +388,7 @@ public class IntraAnalysis extends BodyTransformer{
 					//throw new RuntimeException("## debugging!!!!");
 					System.out.println("body name : " + this.body.getMethod().getSignature());
 
-					List <Value> AArgs = gNewInv.getArgs();
+					List <Value> AArgs =  gNewInv.getArgs();
 					assert(AArgs.size() == 4);
 					for(Value vb : AArgs)
 					{
