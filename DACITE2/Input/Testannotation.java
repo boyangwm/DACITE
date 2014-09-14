@@ -13,7 +13,7 @@ public class Testannotation {
 			
 			Connection conn = (Connection) DriverManager.getConnection(
 					"jdbc:mysql://localhost:3306/simpletest",
-					"root", "boyang");
+					"root", "2543120");
 
 			Statement stmt = (Statement) conn.createStatement();
 			String query = "select SSN, SALARY, AGE from PERSON;";	

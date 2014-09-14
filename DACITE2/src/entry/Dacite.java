@@ -71,15 +71,14 @@ public class Dacite {
 		try {
 
 			//import configuration
-			File file = new File("C:\\Users\\Boyang\\git\\DatabaseRuleMining"
-					+ "\\KmenasWithFpgrowth\\config.txt");
+			File file = new File("config.txt");
 			String input = file.getAbsolutePath();
 
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "boyangtest", "root", "boyang", "com.mysql.jdbc.Driver");
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "sakila", "root", "boyang", "com.mysql.jdbc.Driver");
 			//potholes
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata2", "root", "boyang", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "mock1", "root", "2543120", "com.mysql.jdbc.Driver");
 			
 			
 			db.ImportConfig(input);
