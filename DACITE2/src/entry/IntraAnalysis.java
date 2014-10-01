@@ -48,6 +48,7 @@ import expression.ExpressionUtil;
 import gov.nasa.jpf.symbc.numeric.IntegerExpression;
 import static expression.ExpressionUtil.*;
 
+
 public class IntraAnalysis extends BodyTransformer{
 
 	private static IntraAnalysis instance = new IntraAnalysis();
@@ -453,12 +454,25 @@ public class IntraAnalysis extends BodyTransformer{
 			}
 			sou.setPostBranchCon(newBranchCon);
 			//System.out.println("preCon 2-2  :" + newBranchCon.toString());
-		}else if(stmt instanceof JLookupSwitchStmt){
-			throw new RuntimeException("## Error: does not handle LookupSwitchStmt");
+		}else if(stmt instanceof JLookupSwitchStmt){	//CHENGL
+			StatesOfUnit sou = mapState.get(stmt);
+			Map<Value, IntegerExpression> preState = sou.getPre();
+			sou.updatePostState(preState);
+			//condition part
+			sou.setPostCon(sou.getPreCon());
+			sou.setIsBranch(false);
+			//throw new RuntimeException("## Error: does not handle LookupSwitchStmt");
 		}else if(stmt instanceof JEnterMonitorStmt){
 			throw new RuntimeException("## Error: does not handle JEnterMonitorStmt");
-		}else if(stmt instanceof JExitMonitorStmt){
-			throw new RuntimeException("## Error: does not handle JExitMonitorStmt");
+		}else if(stmt instanceof JExitMonitorStmt){  //CHENGL
+			//throw new RuntimeException("## Error: does not handle JExitMonitorStmt");
+			//added 9/28/2014
+			StatesOfUnit sou = mapState.get(stmt);
+			Map<Value, IntegerExpression> preState = sou.getPre();
+			sou.updatePostState(preState);
+			//condition part
+			sou.setPostCon(sou.getPreCon());
+			sou.setIsBranch(false);
 		}else if(stmt instanceof JNopStmt){
 			StatesOfUnit sou = mapState.get(stmt);
 			Map<Value, IntegerExpression> preState = sou.getPre();
@@ -476,8 +490,14 @@ public class IntraAnalysis extends BodyTransformer{
 			//condition part
 			sou.setPostCon(sou.getPreCon());
 			sou.setIsBranch(false);
-		}else if(stmt instanceof JTableSwitchStmt){
-			throw new RuntimeException("## Error: does not handle TableSwitchStmt");
+		}else if(stmt instanceof JTableSwitchStmt){  //CHENGL
+			StatesOfUnit sou = mapState.get(stmt);
+			Map<Value, IntegerExpression> preState = sou.getPre();
+			sou.updatePostState(preState);
+			//condition part
+			sou.setPostCon(sou.getPreCon());
+			sou.setIsBranch(false);
+			//throw new RuntimeException("## Error: does not handle TableSwitchStmt");
 		}else if(stmt instanceof JThrowStmt){
 			//example, throw temp$2
 			StatesOfUnit sou = mapState.get(stmt);

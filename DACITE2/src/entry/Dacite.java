@@ -8,7 +8,10 @@ import static choco.Choco.not;
 import expression.CBParser;
 import gov.nasa.jpf.symbc.numeric.PCParser;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +41,7 @@ public class Dacite {
 	
 	public ArrayList <String> conflictFunctions = new ArrayList<String>();
 
-	public void run(String[] args, int k, double minsupp, double minconf){
+	public void run(String[] args, int k, double minsupp, double minconf) throws IOException{
 		System.out.println("Run DACITE... ");
 		
 		long startTime = System.currentTimeMillis();
@@ -78,7 +81,7 @@ public class Dacite {
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "sakila", "root", "boyang", "com.mysql.jdbc.Driver");
 			//potholes
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "mock1", "root", "2543120", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "natbroke_db", "root", "2543120", "com.mysql.jdbc.Driver");  //CHENGL
 			
 			
 			db.ImportConfig(input);
@@ -130,10 +133,14 @@ public class Dacite {
 		//System.out.println("#### Find confliction? The result :" + findConfliction(this.SCConstraints, DBConstraints, true));
 
 		boolean basedOnDB = true;
+		File file = new File("Outputs.txt");
+		FileWriter fw = new FileWriter(file.getAbsoluteFile(), true); //CHENGL
+		BufferedWriter bw = new BufferedWriter(fw); //CHENGL
 		if(basedOnDB){
 			ArrayList<ReportRecord> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
 			if(conflictList.size() != 0){
 				System.out.println("\n\n#### Find conflicts !!! #######");
+				bw.write("\n\n#### Find conflicts !!! #######\n"); //CHENGL
 				int counter = 0;
 				for(ReportRecord rr : conflictList){
 					//System.out.println("======= record " + counter++ +  "========");
@@ -148,6 +155,7 @@ public class Dacite {
 				}
 			}else{
 				System.out.println("#### There is no conflict !!! ");
+				bw.write("\n#### There is no conflict !!! \n"); //CHENGL
 			}
 		}else{
 			
@@ -159,11 +167,15 @@ public class Dacite {
 		totalTime = endTime - startTime;
 		
 		System.out.println("time : " + totalTime/1000.0 + "s");
+		bw.write("time : " + totalTime/1000.0 + "s\n"); //CHENGL
 		
 		
 		for(String str: conflictFunctions){
 			System.out.println(str);
+			bw.write(str+"\n"); //CHENGL
 		}
+		bw.close(); //CHENGL
+		
 
 		
 	}
