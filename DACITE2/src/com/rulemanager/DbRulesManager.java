@@ -158,6 +158,7 @@ public class DbRulesManager {
 					putTable(tablename, tableRulesManager); //save TableRulesManager into DbRulesManager
 					continue;
 					
+					
 				}
 				//				 try {
 				//					Thread.sleep(200);
