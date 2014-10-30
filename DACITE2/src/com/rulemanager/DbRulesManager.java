@@ -157,6 +157,7 @@ public class DbRulesManager {
 					TableRulesManager tableRulesManager = new TableRulesManager(tablename, new Rules(), numOfRow); // save association rules information of one table
 					putTable(tablename, tableRulesManager); //save TableRulesManager into DbRulesManager
 					continue;
+					
 				}
 				//				 try {
 				//					Thread.sleep(200);
