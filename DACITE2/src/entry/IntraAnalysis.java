@@ -32,7 +32,9 @@ import soot.jimple.internal.JIfStmt;
 import soot.jimple.internal.JInstanceFieldRef;
 import soot.jimple.internal.JInvokeStmt;
 import soot.jimple.internal.JLookupSwitchStmt;
+import soot.jimple.internal.JNegExpr;
 import soot.jimple.internal.JNopStmt;
+import soot.jimple.internal.JRemExpr;
 import soot.jimple.internal.JRetStmt;
 import soot.jimple.internal.JReturnStmt;
 import soot.jimple.internal.JReturnVoidStmt;
@@ -298,10 +300,12 @@ public class IntraAnalysis extends BodyTransformer{
 					vRight instanceof InvokeExpr ||
 					vRight instanceof NewExpr ||
 					vRight instanceof NewArrayExpr ||
-					vRight instanceof LengthExpr){
+					vRight instanceof LengthExpr || 
+					vRight instanceof JRemExpr){
 				//NewExpr: temp$0 = new Model.OrderType$Type
 				//NewArrayExpr: temp$2 = newarray (Model.OrderType$Type)[2]
 				//LengthExpr : temp$0 = lengthof args 
+				//JRemExpr: temp$4 = dimensionX % gridSize
 				if(vRight instanceof StaticFieldRef){
 					SootFieldRef fr = ((StaticFieldRef) vRight).getFieldRef();
 					fr.getSignature();
@@ -333,15 +337,28 @@ public class IntraAnalysis extends BodyTransformer{
 			}else if (vRight instanceof InstanceOfExpr)
 			{
 				//example, temp$25 = temp$24 instanceof Model.PaymentMethod
+				System.out.println("right InstanceOfExpr");
 				InstanceOfExpr right = (InstanceOfExpr)vRight;
 				IntegerExpression newExp = ExpressionUtil.transferValueToExp(right.getOp(), preState);
 				Map<Value, IntegerExpression> postState = preState;
 				postState.put(vLeft, newExp);
 				sou.updatePostState(postState);
 
-			}else
-			{
-
+			}else if(vRight instanceof JNegExpr){
+				JNegExpr right = (JNegExpr)vRight;
+				Value rightOP = right.getOp();
+				//System.out.println("rightOP : " + rightOP);
+				IntegerExpression newExp = ExpressionUtil.transferValueToExp(rightOP, preState);
+				Map<Value, IntegerExpression> postState = preState;
+				postState.put(vLeft, newExp._minus_reverse(0));
+				sou.updatePostState(postState);
+				
+			
+			}else{
+				System.out.println("final else");
+				
+				System.out.println(vRight.getClass().getName());
+				
 				IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
 				Map<Value, IntegerExpression> postState = preState;
 				postState.put(vLeft, newExp);

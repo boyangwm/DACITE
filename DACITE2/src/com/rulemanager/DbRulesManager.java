@@ -177,7 +177,7 @@ public class DbRulesManager {
 				NewMatrix = kmeans.saveData(conn, tablename);
 			}
 			List<Description> NewMatrixDescription = kmeans.saveDescription();
-			if(NewMatrix.size() > 20){
+			if(NewMatrix.size() > 40){
 				//Boyang - do analysis if the size is greater than 50
 				/******************************************************************************************/
 				// STEP 1: Applying the FP-GROWTH algorithm to find frequent itemsets

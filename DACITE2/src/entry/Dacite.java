@@ -42,12 +42,28 @@ public class Dacite {
 	public ArrayList <String> conflictFunctions = new ArrayList<String>();
 
 	public void run(String[] args, int k, double minsupp, double minconf) throws IOException{
+		
+		
+		Runtime r = Runtime.getRuntime();
+		long t1 = r.totalMemory()/1024;
+		long f1 = r.freeMemory()/1024;
+		
+		
+		
 		System.out.println("Run DACITE... ");
+		
+		boolean basedOnDB = true;
+		File file = new File("Outputs.txt");
+		FileWriter fw = new FileWriter(file.getAbsoluteFile(), true); //CHENGL
+		BufferedWriter bw = new BufferedWriter(fw); //CHENGL
 		
 		long startTime = System.currentTimeMillis();
 		
 		soot.G.reset();
-	
+		SCCMap.clear(); 
+		SCConstraints.clear();
+		
+		
 		//##### 1. source code analysis #######
 		if(args.length == 0)
 		{
@@ -67,6 +83,10 @@ public class Dacite {
 		
 		
 		soot.Main.main(args);
+		
+		long P1Time   = System.currentTimeMillis();
+		System.out.println("phase1 time : " + (P1Time-startTime)/1000.0 + "s");
+		
 
 		//##### 2. association rule mining #######
 		ArrayList<Constraint> DBConstraints = new ArrayList<Constraint> ();
@@ -74,14 +94,19 @@ public class Dacite {
 		try {
 
 			//import configuration
-			File file = new File("config.txt");
-			String input = file.getAbsolutePath();
+			File conf = new File("config.txt");
+			String input = conf.getAbsolutePath();
 
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "boyangtest", "root", "boyang", "com.mysql.jdbc.Driver");
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "sakila", "root", "boyang", "com.mysql.jdbc.Driver");
 			//potholes
-			//db.ConnectDB("jdbc:mysql://localhost:3306/", "mockdata1", "root", "boyang", "com.mysql.jdbc.Driver");
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "natbroke_db", "root", "2543120", "com.mysql.jdbc.Driver");  //CHENGL
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "imdb", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "university", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "natbroke_db", "root", "2543120", "com.mysql.jdbc.Driver");  //CHENGL
+			
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "durbodax", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "broker", "root", "boyang", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "verse", "root", "boyang", "com.mysql.jdbc.Driver");
 			
 			
 			db.ImportConfig(input);
@@ -105,6 +130,12 @@ public class Dacite {
 			e.printStackTrace();
 		}
 
+		
+		long P2Time   = System.currentTimeMillis();
+		System.out.println("phase2 time : " + (P2Time-P1Time)/1000.0 + "s");
+		
+		
+		
 		//test___1  
 		//back
 		printSCconstraints();
@@ -132,10 +163,8 @@ public class Dacite {
 		//test__2
 		//System.out.println("#### Find confliction? The result :" + findConfliction(this.SCConstraints, DBConstraints, true));
 
-		boolean basedOnDB = true;
-		File file = new File("Outputs.txt");
-		FileWriter fw = new FileWriter(file.getAbsoluteFile(), true); //CHENGL
-		BufferedWriter bw = new BufferedWriter(fw); //CHENGL
+		
+		
 		if(basedOnDB){
 			ArrayList<ReportRecord> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
 			if(conflictList.size() != 0){
@@ -163,11 +192,27 @@ public class Dacite {
 		
 		
 		
-		long endTime   = System.currentTimeMillis();
-		totalTime = endTime - startTime;
+		long P3Time   = System.currentTimeMillis();
+		System.out.println("phase3 time : " + (P3Time-P2Time)/1000.0 + "s");
 		
-		System.out.println("time : " + totalTime/1000.0 + "s");
-		bw.write("time : " + totalTime/1000.0 + "s\n"); //CHENGL
+		bw.write("\nphase1 time : " + (P1Time-startTime)/1000.0 + "s\n"); //CHENGL
+		bw.write("phase2 time : " + (P2Time-P1Time)/1000.0 + "s\n"); //CHENGL
+		bw.write("phase3 time : " + (P3Time-P2Time)/1000.0 + "s\n"); //CHENGL
+		totalTime = P3Time - startTime;
+		
+		System.out.println("total time : " + totalTime/1000.0 + "s");
+		bw.write("total time : " + totalTime/1000.0 + "s\n"); //CHENGL
+		bw.write("DB rule size : " + DBConstraints.size() + "\n");
+		bw.write("SC rule size : " + SCConstraints.size() + "\n");
+		
+		long t2 = r.totalMemory()/1024;      
+		long f2 = r.freeMemory()/1024;  
+		System.out.println(t1+"KB");    //                           9356KB
+        System.out.println(f1+"KB");    //   
+		System.out.println(t2+"KB");    //                           9356KB
+	    System.out.println(f2+"KB");    //                           4917KB
+		System.out.println("size of memory : " + ((t2-f2)-(t1-f1))  +"kb");
+		bw.write("size of memory : " + ((t2-f2)-(t1-f1))); //CHENGL
 		
 		
 		for(String str: conflictFunctions){
@@ -175,8 +220,6 @@ public class Dacite {
 			bw.write(str+"\n"); //CHENGL
 		}
 		bw.close(); //CHENGL
-		
-
 		
 	}
 
