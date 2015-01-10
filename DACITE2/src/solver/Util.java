@@ -57,25 +57,45 @@ public class Util {
 
 	public static boolean c1Againstc2(Constraint c1, Constraint c2)
 	{
-
+		//System.out.println("c1  : " + c1);
 		ConstraintBuilder c1L = c1.getLeft(); 
 		ConstraintBuilder c1R = c1.getRight();
+		//System.out.println("c1R  : " + c1R);
 
 		ConstraintBuilder c2L = c2.getLeft(); 
 		ConstraintBuilder c2R = c2.getRight();
 
+
+
 		try{
 
-			UniversalImplication imp1 = new UniversalImplication(c2L, c1L);
-			UniversalImplication imp2 = new UniversalImplication(c2R, c1R);
-			
-			if(imp1.hasCommonVars() && imp2.hasCommonVars()){
-				if(imp1.valid() && !imp2.valid()){
+			if(c1L.header == null){
+				//System.out.println("c1L is null");
+				ConstraintBuilder cb = new ConstraintBuilder();
+				//System.out.println("c2L" + c2L.toString());
+				cb.prependAllCBHeader(c2L);
+				//System.out.println("c2R" + c2R.toString());
+				//cb.prependAllCBHeader(c2R);
+				//System.out.println("cb" + cb.toString());
+				UniversalImplication imp = new UniversalImplication(cb, c1R);
+				if(!imp.valid()){
+				//if(imp.unsat()){
 					//System.out.println("11**************");
 					return true;
 				}
+
 			}
-			
+			else{
+				UniversalImplication imp1 = new UniversalImplication(c2L, c1L);
+				UniversalImplication imp2 = new UniversalImplication(c2R, c1R);
+
+				if(imp1.hasCommonVars() && imp2.hasCommonVars()){
+					if(imp1.valid() && !imp2.valid()){
+						//System.out.println("11**************");
+						return true;
+					}
+				}
+			}
 		}catch(RuntimeException ex){
 			if(ex.getMessage().equals("## Error: Not LinearIntegerConstraint !!!!! "))
 				return false;
@@ -83,7 +103,7 @@ public class Util {
 
 
 
-		
+
 
 		return false;
 	}

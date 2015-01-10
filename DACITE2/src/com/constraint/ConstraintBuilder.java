@@ -144,6 +144,14 @@ public class ConstraintBuilder implements Comparable<ConstraintBuilder>{
         tmp.and = t;
         count= length(header);
      }
+    
+    
+    public void prependAllCBHeader(ConstraintBuilder cb) {
+        cb.header.last().and = header;
+        header = cb.header;
+        count= length(header);
+     }
+    
 
     private static int length(Constraint c) {
         int x= 0;

@@ -37,7 +37,9 @@ public class ProblemChocoInt{
 
 	public Object eq(int value, Object exp) { return Choco.eq(value, (IntegerExpressionVariable) exp);	}
 	public Object eq(Object exp, int value) { return Choco.eq((IntegerExpressionVariable) exp, value);	}
-	public Object eq(Object exp1, Object exp2) { return Choco.eq((IntegerExpressionVariable) exp1, (IntegerExpressionVariable) exp1);	}
+	public Object eq(Object exp1, Object exp2) { 
+		//System.out.println("o o "); 
+		return Choco.eq((IntegerExpressionVariable) exp1, (IntegerExpressionVariable) exp1);	}
 
 	public Object eq(double value, Object exp) {	throw new RuntimeException("## Unsupported eq "); }
 	public Object eq(Object exp, double value) {	throw new RuntimeException("## Unsupported eq "); }

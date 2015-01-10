@@ -49,10 +49,13 @@ public class UniversalImplication {
 		assert(leftO instanceof Constraint);
 		this.left = (Constraint) leftO;
 
+		//System.out.println("right before : " + right);
 		Object rightO = CBParser.parse(right, symStringToVar, rightVarList);
 		assert(rightO instanceof Constraint);
 		this.right = (Constraint) rightO;
-
+		//System.out.println("right after : " + this.right);
+		
+		
 		/*
 		//testing
 		Model m = new CPModel();
@@ -81,6 +84,7 @@ public class UniversalImplication {
 		 */
 	}
 
+	//sat.
 	public boolean valid(){
 		Model m = new CPModel();
 		Solver s = new CPSolver();
@@ -115,7 +119,7 @@ public class UniversalImplication {
 		try{
 			solved = s.solve();
 		}catch(Exception ex){
-			System.out.println("false : " + this.left + this.right);
+			//System.out.println("false : " + this.left + this.right);
 			return false;
 		}
 		boolean feasible = s.isFeasible();
@@ -131,4 +135,32 @@ public class UniversalImplication {
 		}
 		return false;
 	}
+	
+	
+	//sat.
+		public boolean unsat(){
+			Model m = new CPModel();
+			Solver s = new CPSolver();
+			
+			//System.out.println("left : " + this.left); 
+			//System.out.println("right : "+ this.right);
+
+			m.addConstraint(implies(this.left, this.right));
+			//m.addConstraint(and(this.left, this.right));
+			//m.addConstraint(this.right);
+			s.read(m);
+			s.setTimeLimit(100);
+			boolean solved = false;
+			try{
+				solved = s.solve();
+			}catch(Exception ex){
+				//System.out.println("false1 : " + this.left + this.right);
+				return false;
+			}
+			boolean feasible = s.isFeasible();
+			//System.out.println("Feasible: " + feasible);
+			return !solved;
+		}
+		
+		
 }

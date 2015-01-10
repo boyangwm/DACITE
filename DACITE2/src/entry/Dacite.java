@@ -106,7 +106,8 @@ public class Dacite {
 			
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "durbodax", "root", "boyang", "com.mysql.jdbc.Driver");
 			//db.ConnectDB("jdbc:mysql://localhost:3306/", "broker", "root", "boyang", "com.mysql.jdbc.Driver");
-			db.ConnectDB("jdbc:mysql://localhost:3306/", "verse", "root", "boyang", "com.mysql.jdbc.Driver");
+			//db.ConnectDB("jdbc:mysql://localhost:3306/", "verse", "root", "boyang", "com.mysql.jdbc.Driver");
+			db.ConnectDB("jdbc:mysql://localhost:3306/", "a2s", "root", "boyang", "com.mysql.jdbc.Driver");
 			
 			
 			db.ImportConfig(input);

@@ -143,7 +143,6 @@ public class IntraAnalysis extends BodyTransformer{
 		ArrayList<Unit> preWorklist = (ArrayList<Unit>) worklist.clone();
 
 		System.out.println("####body.get method " + b.getMethod());
-
 		worklist.addAll(bugraph.getHeads());
 		init(b.getUnits(),  bugraph.getHeads(), b.getLocals());
 
@@ -286,6 +285,7 @@ public class IntraAnalysis extends BodyTransformer{
 			StatesOfUnit sou = mapState.get(stmt);
 			Map<Value, IntegerExpression> preState = sou.getPre();
 
+			System.out.println("vLeft hashcode : " + vLeft.hashCode());
 			System.out.println("This is JAssignStmt...");
 			// Cast
 			if(vRight instanceof JCastExpr){
@@ -302,6 +302,7 @@ public class IntraAnalysis extends BodyTransformer{
 					vRight instanceof NewArrayExpr ||
 					vRight instanceof LengthExpr || 
 					vRight instanceof JRemExpr){
+	
 				//NewExpr: temp$0 = new Model.OrderType$Type
 				//NewArrayExpr: temp$2 = newarray (Model.OrderType$Type)[2]
 				//LengthExpr : temp$0 = lengthof args 
@@ -316,9 +317,16 @@ public class IntraAnalysis extends BodyTransformer{
 						assertValueList.add(vLeft);
 
 					}
-
+					sou.updatePostState(preState);
+				}else if(vRight instanceof JInstanceFieldRef){
+					
+					IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
+					Map<Value, IntegerExpression> postState = preState;
+					postState.put(vLeft, newExp);
+					sou.updatePostState(postState);
+				}else{
+					sou.updatePostState(preState);
 				}
-				sou.updatePostState(preState);
 			}else if (vRight instanceof Immediate)
 			{
 				System.out.println("Right is Immediate :" + stmt.toString());
@@ -331,6 +339,8 @@ public class IntraAnalysis extends BodyTransformer{
 				{
 					IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
 					Map<Value, IntegerExpression> postState = preState;
+					System.out.println("left : " + vLeft);
+					System.out.println("right IntegerExpression :" + newExp);
 					postState.put(vLeft, newExp);
 					sou.updatePostState(postState);
 				}
@@ -352,13 +362,13 @@ public class IntraAnalysis extends BodyTransformer{
 				Map<Value, IntegerExpression> postState = preState;
 				postState.put(vLeft, newExp._minus_reverse(0));
 				sou.updatePostState(postState);
-				
-			
+
+
 			}else{
 				System.out.println("final else");
-				
+
 				System.out.println(vRight.getClass().getName());
-				
+
 				IntegerExpression newExp = ExpressionUtil.transferValueToExp(vRight, preState);
 				Map<Value, IntegerExpression> postState = preState;
 				postState.put(vLeft, newExp);

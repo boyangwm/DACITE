@@ -21,6 +21,9 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import choco.Choco;
+import choco.kernel.model.variables.Variable;
+import choco.kernel.model.variables.integer.IntegerExpressionVariable;
+import choco.kernel.model.variables.integer.IntegerVariable;
 
 import com.constraint.ConstraintBuilder;
 
@@ -74,6 +77,7 @@ public class CBParser {
 		IntegerExpression	e_rightRef;
 
 		if(eRef instanceof BinaryLinearIntegerExpression) {
+			//System.out.println("BinaryLinearIntegerExpression true");
 			opRef = ((BinaryLinearIntegerExpression)eRef).op;
 			e_leftRef = ((BinaryLinearIntegerExpression)eRef).left;
 			e_rightRef = ((BinaryLinearIntegerExpression)eRef).right;
@@ -91,14 +95,19 @@ public class CBParser {
 			else
 				return pb.plus(getExpression(e_leftRef),getExpression(e_rightRef));
 		case MINUS:
+			//System.out.println("Minus true");
 			if (e_leftRef instanceof IntegerConstant && e_rightRef instanceof IntegerConstant)
 				throw new RuntimeException("## Error: this is not a symbolic expression"); //
 			else if (e_leftRef instanceof IntegerConstant)
 				return pb.minus(((IntegerConstant)e_leftRef).value,getExpression(e_rightRef));
 			else if (e_rightRef instanceof IntegerConstant)
 				return pb.minus(getExpression(e_leftRef),((IntegerConstant)e_rightRef).value);
-			else
+			else{
+				//System.out.println("Minus true e_leftRef " + e_leftRef);
+				//System.out.println("Minus true e_rightRef " + e_rightRef);
+				//System.out.println("Minus true return " +  pb.minus(getExpression(e_leftRef),getExpression(e_rightRef)));
 				return pb.minus(getExpression(e_leftRef),getExpression(e_rightRef));
+			}
 		case MUL:
 			if (e_leftRef instanceof IntegerConstant && e_rightRef instanceof IntegerConstant)
 				throw new RuntimeException("## Error: this is not a symbolic expression"); //
@@ -191,6 +200,9 @@ public class CBParser {
 
 		IntegerExpression c_leftRef = (IntegerExpression)cRef.getLeft();
 		IntegerExpression c_rightRef = (IntegerExpression)cRef.getRight();
+		
+		//System.out.println("c_leftRef : " + c_leftRef);
+		//System.out.println("c_rightRef : " + c_rightRef);
 
 		switch(c_compRef){
 		case EQ:
@@ -206,8 +218,22 @@ public class CBParser {
 			else if (c_rightRef instanceof IntegerConstant) {
 				return pb.eq(getExpression(c_leftRef),((IntegerConstant)c_rightRef).value);
 			}
-			else
-				return pb.eq(getExpression(c_leftRef),getExpression(c_rightRef));
+			else{
+				//System.out.println("case 4");
+				Object o1 = getExpression(c_leftRef);
+				Object o2 = getExpression(c_rightRef);
+				//System.out.println("case 4 left : "+ (IntegerExpressionVariable)o1);
+				//System.out.println("case 4 right : "+ (IntegerExpressionVariable)o2);
+				choco.kernel.model.constraints.Constraint o =  (choco.kernel.model.constraints.Constraint)pb.eq(o1,2);
+	
+				
+				//System.out.println("case 4 return : "+ o.toString());
+				Variable[] varray = o.extractVariables();
+				//for(Variable var : varray){
+				//	System.out.println("var: "+ var.toString());
+				//}
+				return pb.eq(getExpression(c_rightRef),getExpression(c_leftRef));
+			}
 			//break;
 		case NE:
 			if (c_leftRef instanceof IntegerConstant && c_rightRef instanceof IntegerConstant) {
@@ -318,9 +344,11 @@ public class CBParser {
 		while (cRef != null) {
 
 			if (cRef instanceof LinearIntegerConstraint){
+				//System.out.println("cRef  :" + cRef);
 				Object CurC = createDPLinearIntegerConstraint((LinearIntegerConstraint)cRef);// create choco linear integer constraint
 				//returnC = pb.logicAnd(returnC, CurC);
 				//returnC.add(CurC);
+				//System.out.println("CurC  :" + CurC);
 				if(returnC == null)
 					returnC = CurC;
 				else
@@ -334,6 +362,7 @@ public class CBParser {
 		}
 
 		//parasymStringToVar = symStringToVar;
+		//System.out.println("returnC  :" + returnC);
 		return returnC;
 	}
 }

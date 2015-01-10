@@ -39,7 +39,7 @@ public class Run {
 				//for(double confidence = 0.6; confidence <= 0.6; confidence+=0.1 )	{
 				//for(double d = 0.04; d <  0.30; d+=0.01){
 				//for(double d = 0.03; d <  0.12; d+=0.01){
-			    for(double d = 0.03; d >  0.01; d-=0.01){
+			    for(double d = 0.03; d >  0.02; d-=0.01){
 				//for(double confidence = 0.6; confidence <= 0.9; confidence+=0.1 )	{
 
 					FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);	//CHENGLI

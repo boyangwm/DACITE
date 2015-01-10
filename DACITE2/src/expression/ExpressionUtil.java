@@ -15,6 +15,7 @@ import entry.Dacite;
 import soot.Body;
 import soot.Immediate;
 import soot.Local;
+import soot.SootFieldRef;
 import soot.Value;
 import soot.jimple.CmpExpr;
 import soot.jimple.ConditionExpr;
@@ -91,7 +92,8 @@ public class ExpressionUtil {
 
 		if(v instanceof IntConstant || v instanceof JimpleLocal
 				||  v instanceof RealConstant 
-				|| v instanceof LongConstant){
+				|| v instanceof LongConstant
+				|| v instanceof JInstanceFieldRef){
 			return transferSimpleValue(v, expressionMap);
 		}	
 		//all BinopExpr cases
@@ -251,6 +253,19 @@ public class ExpressionUtil {
 			IntegerExpression ie = makeIntConst(i);
 			return ie; 
 		}
+		if(v instanceof JInstanceFieldRef){
+			JInstanceFieldRef fr = (JInstanceFieldRef)v;
+			//System.out.println("hashcode FieldRef : " + fr.hashCode());
+			Value key = findKey(fr, expressionMap);
+			
+			if(key != null) {
+				return expressionMap.get(key);
+			}else{
+				return makeIntVar(fr.toString());
+				//throw new RuntimeException("## Exception: should be in the map");
+			}
+		}
+		
 		if(v instanceof NullConstant){
 			
 		}
@@ -261,6 +276,27 @@ public class ExpressionUtil {
 		throw new RuntimeException(
 				"## Exception: transferSimpleValue type only handle simple cases");
 
+	}
+	
+	public static Value findKey(JInstanceFieldRef fr, Map<Value,IntegerExpression> expressionMap){
+		Value curValue = null;
+		for (Map.Entry<Value, IntegerExpression> entry : expressionMap.entrySet()) {
+			curValue = entry.getKey();
+			if(curValue instanceof JInstanceFieldRef){
+				JInstanceFieldRef key = (JInstanceFieldRef)curValue;
+				SootFieldRef keyField = key.getFieldRef();
+				SootFieldRef frField = fr.getFieldRef();
+				if(frField.getSignature().equals(keyField.getSignature())){
+					return curValue;
+				}else{
+					continue;
+				}
+			}else{
+				continue; 
+			}
+		}
+		return curValue;
+		
 	}
 
 	public static void transferConditionExp(Value condition, 
@@ -344,6 +380,11 @@ public class ExpressionUtil {
 					Local l = (Local)key;
 					if(l.getName().equals(varName))
 					{
+						expressionMap.put(e.getKey(), dbs);
+					}
+				}else if(key instanceof JInstanceFieldRef){
+					JInstanceFieldRef fr = (JInstanceFieldRef)key;
+					if(fr.getFieldRef().getSignature().contains(varName)){
 						expressionMap.put(e.getKey(), dbs);
 					}
 				}
