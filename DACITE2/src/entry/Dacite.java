@@ -168,6 +168,7 @@ public class Dacite {
 		
 		if(basedOnDB){
 			ArrayList<ReportRecord> conflictList = findConfliction(this.SCConstraints, DBConstraints, true);
+			
 			if(conflictList.size() != 0){
 				System.out.println("\n\n#### Find conflicts !!! #######");
 				bw.write("\n\n#### Find conflicts !!! #######\n"); //CHENGL
